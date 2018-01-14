@@ -18,9 +18,9 @@ The plugin should appear in the plugin window as "QTM Connect For Unreal".
 
 ## Supported Unreal version(s)
 
-Unreal Engine 4.16
+* Unreal Engine 4.16
 
 ## Supported Unreal Build Platforms
 
-Windows 32bit
-Windows 64bit
+* Windows 32bit
+* Windows 64bit
