@@ -12,10 +12,11 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of 6DOF data 
 
 1. The QualisysClient object is available in the UE4 Modes panel. This object handles the data streaming between QTM and Unreal.
 2. Drag and drop the QualisysClient object in the world.
-3. Select the QualisysClient instance and edit it's properties. (IP address of the machine running QTM, UdpPort to stream on (0 will use TCP streaming) and stream rate (StreamRate of 0 will stream as quick as possible).
+3. Select the QualisysClient instance and edit it's properties. (IP address of the machine running QTM, UdpPort to stream on (0 will use TCP streaming) and stream rate (StreamRate of 0 will stream data as quick as possible).
 4. Add a Qualisys RigidBody component to a object in the World Outliner pane.
-5. Set the RigidBody name to the name of the RigidBody in QTM.
-6. Play scene. It will automatically try and connect to QTM and receive 6DOF data.
+5. Make sure the object is set to moveable.
+6. Set the RigidBody name to the name of the RigidBody in QTM.
+7. Play scene. It will automatically try and connect to QTM and receive 6DOF data.
 
 ## Supported Unreal version(s)
 
