@@ -1,28 +1,24 @@
 {
-	"FileVersion" : 3,
-	"Version" : 1,
-	"VersionName" : "1.0",
-	"FriendlyName" : "QTM Connect For Unreal",
-	"Description" : "Real-time motion capture streaming from Qualisys Track Manager.",
-	"Category" : "Qualisys",
-	"CreatedBy" : "Qualisys",
-	"CreatedByURL" : "https://www.qualisys.com/",
-	"DocsURL" : "https://www.qualisys.com/software/real-time-sdk/",
-	"MarketplaceURL" : "https://github.com/qualisys/Qualisys-Unreal-Plugin",
-	"SupportURL" : "https://www.qualisys.com/support/",
-	"EngineVersion" : "4.16.0",
-	"CanContainContent" : false,
-	"IsBetaVersion" : false,
-	"Installed" : true,
-	"RequiresBuildPlatform" : false,
-	"Modules" :
-	[
+	"FileVersion": 3,
+	"Version": 2,
+	"VersionName": "1.1",
+	"FriendlyName": "QTM Connect For Unreal",
+	"Description": "Real-time motion capture streaming from Qualisys Track Manager.",
+	"Category": "Qualisys",
+	"CreatedBy": "Qualisys",
+	"CreatedByURL": "https://www.qualisys.com/",
+	"DocsURL": "https://www.qualisys.com/software/real-time-sdk/",
+	"MarketplaceURL": "https://github.com/qualisys/Qualisys-Unreal-Plugin",
+	"SupportURL": "https://www.qualisys.com/support/",
+	"EngineVersion": "4.19.0",
+	"CanContainContent": false,
+	"Installed": true,
+	"Modules": [
 		{
-			"Name" : "QTMConnect",
-			"Type" : "Runtime",
-			"LoadingPhase" : "Default",
-			"WhitelistPlatforms" :
-			[
+			"Name": "QTMConnect",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
 				"Win64",
 				"Win32"
 			]

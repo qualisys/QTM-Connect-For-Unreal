@@ -1,0 +1,14 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-QTMConnect-Win64-DebugGame.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\Program Files\Epic Games\UE_4.19\Engine\Intermediate\Build\Win64\UE4Editor\Development\Engine\SharedPCH.Engine.NonOptimized.h.obj"
+"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win64\UE4Editor\DebugGame\QTMConnect\Module.QTMConnect.cpp.obj"
+"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win64\UE4Editor\DebugGame\QTMConnect\Module.QTMConnect.gen.cpp.obj"
+"D:\Program Files\Epic Games\UE_4.19\Engine\Intermediate\Build\Win64\UE4Editor\Development\QTMConnect\PCLaunch.rc.res"
+"D:\Program Files\Epic Games\UE_4.19\Engine\Intermediate\Build\Win64\UE4Editor\Development\ModuleVersionResource.rc.inl.res"
+/OUT:"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win64\UE4Editor\DebugGame\UE4Editor-QTMConnect-Win64-DebugGame.lib"

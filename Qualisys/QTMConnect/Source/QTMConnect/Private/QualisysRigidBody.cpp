@@ -1,11 +1,12 @@
 // QTM Connect For Unreal. Copyright 2018 Qualisys
 //
-#include "CoreMinimal.h"
+#include "QTMConnect.h"
+
 #include "QualisysRigidBody.h"
 #include "QualisysClient.h"
 
-#include "MessageLog.h"
-#include "UObjectToken.h"
+#include <MessageLog.h>
+#include <UObjectToken.h>
 
 #define LOCTEXT_NAMESPACE "QTMConnect"
 
@@ -13,8 +14,9 @@ UQualisysRigidBody::UQualisysRigidBody(const FObjectInitializer& ObjectInitializ
     Super(ObjectInitializer)
 {
     PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bTickEvenWhenPaused = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
-    PrimaryComponentTick.TickGroup = TG_PostPhysics;
+    PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
     bTickInEditor = false;
     bAutoActivate = true;
@@ -48,11 +50,10 @@ void UQualisysRigidBody::TickComponent(float DeltaTime, enum ELevelTick TickType
         return;
     }
 
-    FQualisysRigidBodyPose rigidBodyState;
-    if (QualisysClient->GetRigidBodyPose(Name, rigidBodyState))
+    FQualisysRigidBodyInfo rigidBody;
+    if (QualisysClient->GetRigidBody(Name, rigidBody))
     {
-        GetOwner()->GetRootComponent()->SetWorldLocation(rigidBodyState.Position);
-        GetOwner()->GetRootComponent()->SetWorldRotation(rigidBodyState.Orientation);
+        GetOwner()->GetRootComponent()->SetWorldLocationAndRotation(rigidBody.Position, rigidBody.Orientation);
     }
 }
 

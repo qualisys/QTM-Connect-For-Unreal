@@ -1,10 +1,8 @@
 // QTM Connect For Unreal. Copyright 2018 Qualisys
 //
-#include "CoreMinimal.h"
-#include <IPluginManager.h>
-
 #include "QTMConnect.h"
 
+#include <IPluginManager.h>
 #include <MessageDialog.h>
 #include <Paths.h>
 #include <PlatformProcess.h>

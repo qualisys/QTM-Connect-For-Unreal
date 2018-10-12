@@ -1,0 +1,9 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x86
+/SUBSYSTEM:WINDOWS
+/LTCG
+"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win32\UE4\Shipping\QTMConnect\Module.QTMConnect.cpp.obj"
+"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win32\UE4\Shipping\QTMConnect\Module.QTMConnect.gen.cpp.obj"
+"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Intermediate\Build\Win32\UE4\Shipping\QTMConnect\PCLaunch.rc.res"
+/OUT:"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Binaries\Win32\UE4-QTMConnect-Win32-Shipping.lib"

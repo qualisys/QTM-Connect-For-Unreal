@@ -7,22 +7,24 @@
 
 #include "QualisysClient.generated.h"
 
-/*
-// Marker
+class CRTPacket;
+
+// Trajectory
 USTRUCT(BlueprintType)
-struct FQualisysMarker
+struct FQualisysTrajectoryInfo
 {
     GENERATED_USTRUCT_BODY()
 
-    // Position of the marker
+    // Position of the trajectory
     UPROPERTY(BlueprintReadOnly, Category = "Qualisys")
     FVector Position;
-};
-*/
 
-// RigidBodyPose structure
+    unsigned int Index;
+};
+
+// RigidBody structure
 USTRUCT(BlueprintType)
-struct FQualisysRigidBodyPose
+struct FQualisysRigidBodyInfo
 {
     GENERATED_USTRUCT_BODY()
 
@@ -33,6 +35,23 @@ struct FQualisysRigidBodyPose
     // Orientation of the rigid body
     UPROPERTY(BlueprintReadOnly, Category = "Qualisys")
     FQuat Orientation;
+
+    unsigned int Index;
+};
+
+class CAutoLock
+{
+public:
+    CAutoLock(FCriticalSection* lock) : mLock(lock)
+    {
+        mLock->Lock();
+    }
+    ~CAutoLock()
+    {
+        mLock->Unlock();
+    }
+private:
+    FCriticalSection* mLock;
 };
 
 // Qualisys streaming client actor
@@ -54,21 +73,26 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
     int StreamRate;
 
-    /*
-    * Retrieves available FQualisysRigidBodyPose for the rigid body.
-    * The translation of the Qualisys Client actor is applied to the pose.
-    *
-    * @param RigidBody Name of the rigid body
-    * @param RigidBodyPose Receives latest available rigid body state (if any).
-    * @return True if any rigid body state was available for the specified name.
-    */
-    UFUNCTION(BlueprintCallable, Category = "Qualisys")
-    bool GetRigidBodyPose(FString RigidBody, FQualisysRigidBodyPose& RigidBodyPose);
+    // Debug flag for viewing all rigid body coordinate system and all labeled trajectories
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
+    bool DebugDrawing;
 
-    /*
-    * Convenience function for finding a Qualisys Client actor streaming object.
-    * @return The first AQualisysClient actor found in @World.
-    */
+    // Retrieves available FQualisysRigidBody for the given rigid body name.
+    // @param Name of the rigid body
+    // @param RigidBody Receives latest available rigid body transform (if any).
+    // @return True if any rigid body transform was available for the specified name.
+    UFUNCTION(BlueprintCallable, Category = "Qualisys")
+    bool GetRigidBody(FString rigidBodyName, FQualisysRigidBodyInfo& rigidBody);
+
+    // Retrieves available FQualisysTrajectory for the given trajectory name.
+    // @param Name of the Trajectory
+    // @param Trajectory Receives latest available trajectory position (if any).
+    // @return True if any trajectory information was available for the specified name.
+    UFUNCTION(BlueprintCallable, Category = "Qualisys")
+    bool GetMarkerPosition(FString trajectoryName, FQualisysTrajectoryInfo& trajectory);
+
+    // Convenience function for finding a Qualisys Client actor streaming object.
+    // @return The first AQualisysClient actor found in @World.
     UFUNCTION(BlueprintCallable, Category = "Qualisys")
     static AQualisysClient* FindQualisysClient(UWorld* World);
 
@@ -77,16 +101,18 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 
-private:
-    bool GetRigidBodyPoseUntransformedByClient(FString rigidBody, FQualisysRigidBodyPose& rigidBodyPose);
+    static void ConvertQtmColorToUE(unsigned int qtmColor, FColor &color);
 
+    void HandleQtmData(CRTPacket * rtPacket);
+    void HandleQtmEvents(CRTPacket * rtPacket);
+
+private:
     void InitializeQualisysClient();
     void ShutdownQualisysClient();
 
-    class CRTProtocol* mRTProtocol;
-    int mLastFrameNumber;
+    class CRTProtocol* mRtProtocol;
 
     FCriticalSection mUpdateLock;
-    //TMap<FString, FQualisysMarker> mMarkerPositions;
-    TMap<FString, FQualisysRigidBodyPose> mRigidBodyPoses;
+    TMap<FString, FQualisysTrajectoryInfo> mTrajectories;
+    TMap<FString, FQualisysRigidBodyInfo> mRigidBodies;
 };
