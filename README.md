@@ -17,15 +17,16 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of 6DOF data 
 5. Make sure the object is set to moveable.
 6. Set the RigidBody name to the name of the RigidBody in QTM.
 7. Play scene. It will automatically try and connect to QTM and receive 6DOF data.
+8. Use DebugDrawing setting in QualisysClient to display all labeled trajectories as spheres and all rigid bodies as cubes.
+
+To connect position of a component to position of a labeled trajectory use the QualisysTrajectory ActorComponent.
 
 ## Supported Unreal version(s)
 
 If the plugin should be used in a unsupported Unreal version then put it in the Unreal project folder\Plugins and rebuild project.
 Use the appropriate packaged release for the Unreal project.
 
-* Unreal Engine 4.16
-* Unreal Engine 4.17
-* Unreal Engine 4.18
+The code in the master branch has been built with Unreal Engine 4.19.2
 
 ## Supported Unreal Build Platforms
 
