@@ -1,0 +1,8 @@
+{
+	"BuildId": "4541578",
+	"Modules": 
+	{
+		"QTMConnectLiveLink": "UE4Editor-QTMConnectLiveLink.dll",
+		"QTMConnectLiveLinkEditor": "UE4Editor-QTMConnectLiveLinkEditor.dll"
+	}
+}

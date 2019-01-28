@@ -1,0 +1,7 @@
+{
+	"OutputFiles": [
+		"PCH.QTMConnect.h.obj",
+		"Module.QTMConnect.cpp.obj",
+		"Module.QTMConnect.gen.cpp.obj"
+	]
+}
