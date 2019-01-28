@@ -1,11 +1,13 @@
 # QTM Connect for Unreal
 
-QTM Connect for Unreal is an Unreal plugin that supports streaming of 6DOF data between Qualisys Track Manager and Unreal.
+QTM Connect for Unreal is an Unreal plugin that supports streaming of data between Qualisys Track Manager and Unreal.
 
 ## Installation of the plugin
 
-1. Copy the entire Qualisys plugin directory to C:\Program Files\Epic Games\UE_4.xx\Engine\Plugins.
+1. Copy the directory `.\Prebuilt\Qualisys` to `C:\Program Files\Epic Games\UE_4.xx\Engine\Plugins`.
+    -  _Optional: Copy `.\Example Project` to `C:\Users\<user>\Documents\Unreal Projects`_
 2. Start Unreal and create a project.
+    -  _Optional: Open Project `QualisysAvatar` from step 1._
 3. The plugin should appear in the plugin window as "QTM Connect For Unreal". Click Enable and restart Unreal to get it activated.
 
 ## How to use the QualisysClient Actor object and QualisysRigidBody ActorComponent object
@@ -21,14 +23,29 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of 6DOF data 
 
 To connect position of a component to position of a labeled trajectory use the QualisysTrajectory ActorComponent.
 
+## How to use the QTM Connect LiveLink plugin
+
+1. Start QTM in preview mode or file mode being sure there is a skeleton to stream. An example qtm file including a skeleton is provided in `.\Example Project`
+2. Enable `LiveLink` and `QTMConnectLiveLink` in Unreal under `Edit->Plugins`.
+3. Go to `Window->Live Link`, click `Add->QTM Connect LiveLink`, enter the QTM IP address and port and click ok.
+4. If the Skeleton of the Skeletal Mesh that you wish to animate matches the skeleton data being streamed from QTM (same bone names and hierarchy), then skip steps 5-7.
+5. In the Content Browser, click `Add New->Blueprint Class` and expand `All Classes` and search for `QualisysLiveLinkRetargetAsset`, and click `Select`.
+6. Double-click the retarget asset and go to `Details->Bone Mapping` and expand the `Bone Mapping` variable.
+7. In the right column, fill in the names of the Skeleton bones that best correspond to the QTM skeleton bones seen in the left column. If there is no corresponding 
+   bone or the bone name already matches the QTM bone name, leave it as "None".
+8. In the Content Browser, go to the Skeletal Mesh that you wish to animate and `Right-click->Create->Anim Blueprint`. Give it a name and then double click on it.
+9. Right-click anywhere in the animation graph and search for the Live Link Pose node.
+10. Enter the subject name (the name of the skeleton being streamed from QTM), and connect the output pose to the input pose of the Final Animation Pose node.
+11. Click on the `Live Link Pose` node and go to `Details->Retarget->Retarget Asset` and select the retarget asset you created in step 5, or choose the QualisysLiveLinkRetargetAsset 
+   if you skipped steps 5-7. 
+12. Click Compile, and you should see the mesh moving in the preview window. 
+13. Drag the animation blueprint you created in step 8 into your scene, then click Play.
+
 ## Supported Unreal version(s)
 
-If the plugin should be used in a unsupported Unreal version then put it in the Unreal project folder\Plugins and rebuild project.
+If the plugin should be used in a unsupported Unreal version then put it in the `Unreal project folder\Plugins` and rebuild project.
 Use the appropriate packaged release for the Unreal project.
-
-The code in the master branch has been built with Unreal Engine 4.19.2
 
 ## Supported Unreal Build Platforms
 
-* Windows 32bit
 * Windows 64bit

@@ -1,12 +1,12 @@
-// QTM Connect For Unreal. Copyright 2018 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
 //
-#include "QTMConnect.h"
-
 #include "QualisysTrajectory.h"
+
+#include "QTMConnect.h"
 #include "QualisysClient.h"
 
-#include <MessageLog.h>
-#include <UObjectToken.h>
+#include <Logging/MessageLog.h>
+#include <Misc/UObjectToken.h>
 
 #define LOCTEXT_NAMESPACE "QTMConnect"
 

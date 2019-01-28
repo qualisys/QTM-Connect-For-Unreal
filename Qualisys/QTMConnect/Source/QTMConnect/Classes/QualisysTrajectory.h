@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
 //
 #pragma once
 
@@ -13,7 +13,7 @@ class QTMCONNECT_API UQualisysTrajectory : public UActorComponent
 
     // Name of the rigid body
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
-    FString Name;
+    FName Name;
 
     // Set to the Qualisys Client actor. If not set it will default to the first found in the World.
     UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "Qualisys")

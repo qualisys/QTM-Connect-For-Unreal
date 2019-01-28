@@ -1,13 +1,20 @@
-// QTM Connect For Unreal. Copyright 2018 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
 //
 using Path = System.IO.Path;
 using UnrealBuildTool;
+using System;
 
 public class QTMConnect : ModuleRules
 {
     public QTMConnect(ReadOnlyTargetRules Target) : base(Target)
     {
-        //Definitions.Add("RTCLIENTSDK_IMPORTS");
+        PrivatePCHHeaderFile = "Public/QTMConnect.h";
+        //PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        string rtClientSDKPath = Path.GetFullPath(Path.Combine(PluginDirectory, "ThirdParty/RTClientSDK"));
+        string rtClientSDKIncludePath = System.IO.Path.Combine(rtClientSDKPath, "Include");
+        string targetPlatformPathName = (Target.Platform == UnrealTargetPlatform.Win32) ? "Win32" : "Win64";
+        string rtClientSDKLibPath = Path.Combine(rtClientSDKPath, "Lib", targetPlatformPathName);
 
         PublicIncludePaths.AddRange(
             new string[] {
@@ -16,14 +23,16 @@ public class QTMConnect : ModuleRules
             }
         );
 
-
         PrivateIncludePaths.AddRange(
             new string[] {
                 "QTMConnect/Private",
+                rtClientSDKIncludePath,
                 // ... add other private include paths required here ...
             }
         );
 
+        // Adding your definition here, will add a global Preprocessor value for cpp
+        //Definitions.Add("QTM_RTCLIENTSDK_LIB_DIR=" + targetPlatformPathName/RTClientSDK + "");
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -52,18 +61,13 @@ public class QTMConnect : ModuleRules
             }
         );
 
-        string rtClientSDKPath = Path.GetFullPath(Path.Combine(ModuleDirectory, "..", "..", "ThirdParty", "RTClientSDK"));
-        PublicSystemIncludePaths.Add(System.IO.Path.Combine(rtClientSDKPath, "Include"));
+        PublicSystemIncludePaths.Add(rtClientSDKIncludePath);
 
         if (Target.Platform == UnrealTargetPlatform.Win32 ||
             Target.Platform == UnrealTargetPlatform.Win64)
-        {
-            string targetPlatformPathName = (Target.Platform == UnrealTargetPlatform.Win32) ? "Win32" : "Win64";
-            string rtClientSDKBinPath = Path.Combine(rtClientSDKPath, "Lib", targetPlatformPathName);
-            PublicLibraryPaths.Add(rtClientSDKBinPath);
+        {            
+            PublicLibraryPaths.Add(rtClientSDKLibPath);
             PublicAdditionalLibraries.Add("RTClientSDK.lib");
-            PublicDelayLoadDLLs.Add("RTClientSDK.dll");
-            RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(rtClientSDKBinPath, "RTClientSDK.dll")));
         }
     }
 }

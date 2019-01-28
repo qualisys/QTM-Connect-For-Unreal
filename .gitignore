@@ -28,3 +28,6 @@
 *.exe
 *.out
 *.app
+
+Qualisys/QTMConnect/Intermediate/
+Qualisys/QTMConnectLiveLink/Intermediate/
