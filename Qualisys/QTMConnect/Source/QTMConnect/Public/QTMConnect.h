@@ -1,8 +1,8 @@
-// QTM Connect For Unreal. Copyright 2018 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
 //
 #pragma once
 
-#include <ModuleManager.h>
+#include <Modules/ModuleManager.h>
 
 class CRTProtocol;
 

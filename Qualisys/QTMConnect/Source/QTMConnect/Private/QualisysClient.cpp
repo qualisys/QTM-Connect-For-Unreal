@@ -1,35 +1,37 @@
-// QTM Connect For Unreal. Copyright 2018 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
 //
-#include "QTMConnect.h"
-
 #include "QualisysClient.h"
+
+#include "QTMConnect.h"
 #include "QualisysRigidBody.h"
 
 #include <EngineUtils.h>
 #include <DrawDebugHelpers.h>
 
-#include "AllowWindowsPlatformTypes.h"
-#include "AllowWindowsPlatformAtomics.h"
+#include <Windows/AllowWindowsPlatformTypes.h>
+#include <Windows/AllowWindowsPlatformAtomics.h>
 #include "RTProtocol.h"
 #include "RTPacket.h"
-#include "HideWindowsPlatformAtomics.h"
-#include "HideWindowsPlatformTypes.h"
+#include <Windows/HideWindowsPlatformAtomics.h>
+#include <Windows/HideWindowsPlatformTypes.h>
 
 #include <numeric>
 
 #define LOCTEXT_NAMESPACE "QTMConnect"
 
-#define QTM_STREAM_PORT             22222
-#define QTM_STREAM_MAJOR_VERSION    1
-#define QTM_STREAM_MINOR_VERSION    13
+#define QTM_STREAMING_PORT 22222
+
+#pragma optimize("", off)
 
 AQualisysClient::AQualisysClient(const FObjectInitializer& ObjectInitializer) :
     Super(ObjectInitializer),
     mRtProtocol(nullptr),
+    AutoDiscoverQTMServer(true),
     IPAddressToQTMServer("127.0.0.1"),
     UdpPort(6789),
     StreamRate(0),
-    DebugDrawing(false)
+    DebugDrawingRigidBodies(false),
+    DebugDrawingTrajectories(false)
 {
     RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 
@@ -80,23 +82,6 @@ void AQualisysClient::EndPlay(const EEndPlayReason::Type EndPlayReason)
     ShutdownQualisysClient();
 }
 
-// If one want to automatically find the first available QTM instance streaming data then we can discover it.
-//if (mRTProtocol->DiscoverRTServer(0, false))
-//{
-//    if (discoverResponses >= 1)
-//    {
-//        char message[256];
-//        unsigned int addr;
-//        unsigned short basePort;
-//        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message, sizeof(message)))
-//        {
-//            char serverAddr[40];
-//            sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
-//            IPAddressToQTMServer = serverAddr;
-//        }
-//    }
-//}
-
 void AQualisysClient::InitializeQualisysClient()
 {
     check(IQTMConnectPlugin::IsAvailable());
@@ -105,9 +90,30 @@ void AQualisysClient::InitializeQualisysClient()
     {
         mRtProtocol = IQTMConnectPlugin::Get().CreateRTObject();
 
+        if (AutoDiscoverQTMServer)
+        {
+            // If one want to automatically find the first available QTM instance streaming data then we can discover it.
+            if (mRtProtocol->DiscoverRTServer(0, false))
+            {
+                const auto discoverResponses = mRtProtocol->GetNumberOfDiscoverResponses();
+                if (discoverResponses >= 1)
+                {
+                    char message[256];
+                    unsigned int addr;
+                    unsigned short basePort;
+                    if (mRtProtocol->GetDiscoverResponse(0, addr, basePort, message, sizeof(message)))
+                    {
+                        char serverAddr[40];
+                        sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
+                        IPAddressToQTMServer = serverAddr;
+                    }
+                }
+            }
+        }
+
         const std::string serverAddr(TCHAR_TO_ANSI(*IPAddressToQTMServer));
         unsigned short sUdpPort = UdpPort;
-        auto connected = mRtProtocol->Connect(serverAddr.c_str(), QTM_STREAM_PORT, &sUdpPort, QTM_STREAM_MAJOR_VERSION, QTM_STREAM_MINOR_VERSION);
+        auto connected = mRtProtocol->Connect(serverAddr.c_str(), QTM_STREAMING_PORT, &sUdpPort);
         if (!connected)
         {
             GLog->Logf(TEXT("AQualisysClient::InitializeQualisysClient: Connection to QTM failed: %s"), serverAddr.c_str());
@@ -143,7 +149,7 @@ void AQualisysClient::InitializeQualisysClient()
     }
 
     const auto streamRateType = (StreamRate <= 0) ? CRTProtocol::RateAllFrames : CRTProtocol::RateFrequency;
-    auto streaming = mRtProtocol->StreamFrames(streamRateType, StreamRate, UdpPort, nullptr, componentsToStream, nullptr);
+    auto streaming = mRtProtocol->StreamFrames(streamRateType, StreamRate, UdpPort, nullptr, componentsToStream);
     if (!streaming)
     {
         GLog->Logf(TEXT("AQualisysClient::InitializeQualisysClient: StreamFrames failed"));
@@ -158,7 +164,7 @@ void AQualisysClient::ShutdownQualisysClient()
 {
     if (mRtProtocol != nullptr)
     {
-        mUpdateLock.Lock();
+        CAutoLock lock(&mUpdateLock);
 
         mRtProtocol->StreamFramesStop();
         mRtProtocol->Disconnect();
@@ -167,8 +173,6 @@ void AQualisysClient::ShutdownQualisysClient()
         IQTMConnectPlugin::Get().DestroyRTObject(mRtProtocol);
 
         mRtProtocol = nullptr;
-
-        mUpdateLock.Unlock();
     }
 }
 
@@ -232,16 +236,18 @@ void AQualisysClient::TickActor(float DeltaTime, enum ELevelTick TickType, FActo
     {
         HandleQtmData(rtPacket);
 
-        if (DebugDrawing)
+        if (DebugDrawingRigidBodies)
         {
             for (auto rigidBody : mRigidBodies)
             {
                 FColor color;
                 ConvertQtmColorToUE(mRtProtocol->Get6DOFBodyColor(rigidBody.Value.Index), color);
-                DrawDebugSolidBox(GetWorld(), FBox(FVector(-5,-5,-5), FVector(5, 5, 5)), color, FTransform(rigidBody.Value.Orientation, rigidBody.Value.Position));
+                DrawDebugSolidBox(GetWorld(), FBox(FVector(-5, -5, -5), FVector(5, 5, 5)), color, FTransform(rigidBody.Value.Orientation, rigidBody.Value.Position));
                 DrawDebugCoordinateSystem(GetWorld(), rigidBody.Value.Position, rigidBody.Value.Orientation.Rotator(), 20, false, 0, 0, 2);
             }
-
+        }
+        if (DebugDrawingTrajectories)
+        {
             for (auto trajectory : mTrajectories)
             {
                 FColor color;
@@ -313,6 +319,7 @@ void AQualisysClient::HandleQtmData(CRTPacket * rtPacket)
                 mRigidBodies.Emplace(FString(bodyName).ToLower(), rigidBody);
             }
         }
+
         mUpdateLock.Unlock();
     }
 }
@@ -347,10 +354,10 @@ void AQualisysClient::HandleQtmEvents(CRTPacket * rtPacket)
     }
 }
 
-bool AQualisysClient::GetRigidBody(FString rigidBodyName, FQualisysRigidBodyInfo& rigidBody)
+bool AQualisysClient::GetRigidBody(const FName& rigidBodyName, FQualisysRigidBodyInfo& rigidBody)
 {
     CAutoLock lock(&mUpdateLock);
-    if (FQualisysRigidBodyInfo* body = mRigidBodies.Find(rigidBodyName.ToLower()))
+    if (FQualisysRigidBodyInfo* body = mRigidBodies.Find(rigidBodyName.ToString().ToLower()))
     {
         rigidBody = *body;
         return true;
@@ -358,15 +365,17 @@ bool AQualisysClient::GetRigidBody(FString rigidBodyName, FQualisysRigidBodyInfo
     return false;
 }
 
-bool AQualisysClient::GetMarkerPosition(FString trajectoryName, FQualisysTrajectoryInfo& trajectoryInfo)
+bool AQualisysClient::GetMarkerPosition(const FName& trajectoryName, FQualisysTrajectoryInfo& trajectoryInfo)
 {
     CAutoLock lock(&mUpdateLock);
-    if (FQualisysTrajectoryInfo* trajectory = mTrajectories.Find(trajectoryName.ToLower()))
+    if (FQualisysTrajectoryInfo* trajectory = mTrajectories.Find(trajectoryName.ToString().ToLower()))
     {
         trajectoryInfo = *trajectory;
         return true;
     }
     return false;
 }
+
+#pragma optimize("", on)
 
 #undef LOCTEXT_NAMESPACE

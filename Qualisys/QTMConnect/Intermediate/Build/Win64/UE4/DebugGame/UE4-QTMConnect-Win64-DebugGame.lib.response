@@ -1,8 +1,0 @@
-/NOLOGO
-/errorReport:prompt
-/MACHINE:x64
-/SUBSYSTEM:WINDOWS
-"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win64\UE4\DebugGame\QTMConnect\Module.QTMConnect.cpp.obj"
-"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Intermediate\Build\Win64\UE4\DebugGame\QTMConnect\Module.QTMConnect.gen.cpp.obj"
-"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Intermediate\Build\Win64\UE4\DebugGame\QTMConnect\PCLaunch.rc.res"
-/OUT:"C:\Users\mln\Documents\Unreal Projects\UE419Clean\Plugins\Qualisys\QTMConnect\Binaries\Win64\UE4-QTMConnect-Win64-DebugGame.lib"

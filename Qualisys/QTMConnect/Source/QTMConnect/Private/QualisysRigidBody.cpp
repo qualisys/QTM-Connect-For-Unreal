@@ -1,12 +1,12 @@
-// QTM Connect For Unreal. Copyright 2018 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
 //
-#include "QTMConnect.h"
-
 #include "QualisysRigidBody.h"
+
+#include "QTMConnect.h"
 #include "QualisysClient.h"
 
-#include <MessageLog.h>
-#include <UObjectToken.h>
+#include <Logging/MessageLog.h>
+#include <Misc/UObjectToken.h>
 
 #define LOCTEXT_NAMESPACE "QTMConnect"
 
@@ -54,6 +54,7 @@ void UQualisysRigidBody::TickComponent(float DeltaTime, enum ELevelTick TickType
     if (QualisysClient->GetRigidBody(Name, rigidBody))
     {
         GetOwner()->GetRootComponent()->SetWorldLocationAndRotation(rigidBody.Position, rigidBody.Orientation);
+        //GetOwner()->GetRootComponent()->SetWorldRotation();
     }
 }
 
