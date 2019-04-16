@@ -4,6 +4,8 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of data betwe
 
 ## Installation of the plugin
 
+*Note that the pre-built dll's can be found in the [prebuilt branch.](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.21)*
+
 1. Copy the directory `.\Prebuilt\Qualisys` to `C:\Program Files\Epic Games\UE_4.xx\Engine\Plugins`.
     -  _Optional: Copy `.\Example Project` to `C:\Users\<user>\Documents\Unreal Projects`_
 2. Start Unreal and create a project.
