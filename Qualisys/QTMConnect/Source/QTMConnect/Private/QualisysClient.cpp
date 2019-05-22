@@ -25,13 +25,13 @@
 
 AQualisysClient::AQualisysClient(const FObjectInitializer& ObjectInitializer) :
     Super(ObjectInitializer),
-    mRtProtocol(nullptr),
     AutoDiscoverQTMServer(true),
     IPAddressToQTMServer("127.0.0.1"),
     UdpPort(6789),
     StreamRate(0),
     DebugDrawingRigidBodies(false),
-    DebugDrawingTrajectories(false)
+    DebugDrawingTrajectories(false),
+    mRtProtocol(nullptr)
 {
     RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("RootSceneComponent"));
 

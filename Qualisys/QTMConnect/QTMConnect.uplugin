@@ -1,7 +1,5 @@
 {
   "FileVersion": 3,
-  "Version": 2,
-  "VersionName": "1.1",
   "FriendlyName": "QTM Connect For Unreal",
   "Description": "Real-time motion capture streaming from Qualisys Track Manager.",
   "Category": "Qualisys",
@@ -10,7 +8,6 @@
   "DocsURL": "https://www.qualisys.com/software/real-time-sdk/",
   "MarketplaceURL": "https://github.com/qualisys/Qualisys-Unreal-Plugin",
   "SupportURL": "https://www.qualisys.com/support/",
-  "EngineVersion": "4.21.0",
   "CanContainContent": false,
   "IsBetaVersion": false,
   "Installed": true,

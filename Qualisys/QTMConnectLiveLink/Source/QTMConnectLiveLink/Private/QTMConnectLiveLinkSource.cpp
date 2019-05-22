@@ -18,9 +18,9 @@
 #pragma optimize("", off)
 
 FQTMConnectLiveLinkSource::FQTMConnectLiveLinkSource(const QTMConnectLiveLinkSettings& settings)
-    : Stopping(false)
+    : Settings(settings)
+    , Stopping(false)
     , Thread(nullptr)
-    , Settings(settings)
 {
     SourceType = LOCTEXT("QTMConnectLiveLinkSourceType", "QTM Connect LiveLink");
     SourceStatus = LOCTEXT("SourceStatus_NotConnected", "Not connected");
