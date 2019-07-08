@@ -137,19 +137,26 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
         if (!readSettings)
         {
-            bool anyData;
-            if (!mRTProtocol->ReadSkeletonSettings(anyData) || !mRTProtocol->Read6DOFSettings(anyData))
+            bool anySkeletonData;
+            bool any6DOFData;
+            if (mRTProtocol->ReadSkeletonSettings(anySkeletonData) &&
+                mRTProtocol->Read6DOFSettings(any6DOFData) &&
+                anySkeletonData &&
+                any6DOFData)
+            {
+                readSettings = true;
+
+                CreateLiveLinkSubjects();
+
+                SourceStatus = LOCTEXT("SourceStatus_ReadSettings", "Read streaming settings from QTM");
+            }
+            else
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 
                 FPlatformProcess::Sleep(1.0f);
                 continue;
             }
-            readSettings = true;
-
-            CreateLiveLinkSubjects();
-
-            SourceStatus = LOCTEXT("SourceStatus_ReadSettings", "Read streaming settings from QTM");
         }
 
         if (!startedStreaming)
