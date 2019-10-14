@@ -43,9 +43,11 @@ To connect position of a component to position of a labeled trajectory use the Q
 12. Click Compile, and you should see the mesh moving in the preview window. 
 13. Drag the animation blueprint you created in step 8 into your scene, then click Play.
 
-*[Streaming tutorial video](https://www.youtube.com/watch?v=lJ3CwEu2OxY)*
-*[Bone mapping tutorial video](https://www.youtube.com/watch?v=YZ24RH2_LZM)*
-*[How to import a Qualisys Track Manager exported FBX](https://www.youtube.com/watch?v=IC70NnnBw60)*
+## Video tutorials
+
+1. *[Streaming tutorial video](https://www.youtube.com/watch?v=lJ3CwEu2OxY)*
+2. *[Bone mapping tutorial video](https://www.youtube.com/watch?v=YZ24RH2_LZM)*
+3. *[How to import a Qualisys Track Manager exported FBX](https://www.youtube.com/watch?v=IC70NnnBw60)*
 
 ## Supported Unreal version(s)
 
