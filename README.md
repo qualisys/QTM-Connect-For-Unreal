@@ -4,7 +4,7 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of data betwe
 
 ## Installation of the plugin
 
-*Note that the pre-built dll's can be found in the [prebuilt branch.](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.21)*
+*Note that the pre-built dll's can be found in the [prebuilt branch.](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.23)*
 
 1. Copy the directory `.\Prebuilt\Qualisys` to `C:\Program Files\Epic Games\UE_4.xx\Engine\Plugins`.
     -  _Optional: Copy `.\Example Project` to `C:\Users\<user>\Documents\Unreal Projects`_
@@ -42,6 +42,10 @@ To connect position of a component to position of a labeled trajectory use the Q
    if you skipped steps 5-7. 
 12. Click Compile, and you should see the mesh moving in the preview window. 
 13. Drag the animation blueprint you created in step 8 into your scene, then click Play.
+
+*[Streaming tutorial video](https://www.youtube.com/watch?v=lJ3CwEu2OxY)*
+*[Bone mapping tutorial video](https://www.youtube.com/watch?v=YZ24RH2_LZM)*
+*[How to import a Qualisys Track Manager exported FBX](https://www.youtube.com/watch?v=IC70NnnBw60)*
 
 ## Supported Unreal version(s)
 
