@@ -3,6 +3,7 @@
 #pragma once
 
 #include "LiveLinkSourceFactory.h"
+#include "QTMConnectLiveLinkSource.h"
 #include "QTMConnectLiveLinkSourceFactory.generated.h"
 
 class SQTMConnectLiveLinkSourceEditor;
@@ -14,11 +15,12 @@ public:
 
     GENERATED_BODY()
 
-    virtual FText GetSourceDisplayName() const;
-    virtual FText GetSourceTooltip() const;
+    virtual FText GetSourceDisplayName() const override;
+    virtual FText GetSourceTooltip() const override;
+    virtual EMenuType GetMenuType() const override;
+    virtual TSharedPtr<SWidget> BuildCreationPanel(FOnLiveLinkSourceCreated OnLiveLinkSourceCreated) const override;
+    virtual TSharedPtr<ILiveLinkSource> CreateSource(const FString& ConnectionString) const override;
 
-    virtual TSharedPtr<SWidget> CreateSourceCreationPanel();
-    virtual TSharedPtr<ILiveLinkSource> OnSourceCreationPanelClosed(bool bMakeSource);
-
-    TSharedPtr<SQTMConnectLiveLinkSourceEditor> ActiveSourceEditor;
+private:
+    void OnPropertiesSelected(QTMConnectLiveLinkSettings settings, FOnLiveLinkSourceCreated OnLiveLinkSourceCreated) const;
 };

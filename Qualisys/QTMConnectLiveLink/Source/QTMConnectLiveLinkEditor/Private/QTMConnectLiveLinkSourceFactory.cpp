@@ -19,30 +19,29 @@ FText UQTMConnectLiveLinkSourceFactory::GetSourceTooltip() const
     return LOCTEXT("SourceTooltip", "Creates a connection to QTM");
 }
 
-TSharedPtr<SWidget> UQTMConnectLiveLinkSourceFactory::CreateSourceCreationPanel()
+ULiveLinkSourceFactory::EMenuType UQTMConnectLiveLinkSourceFactory::GetMenuType() const
 {
-    if (!ActiveSourceEditor.IsValid())
-    {
-        SAssignNew(ActiveSourceEditor, SQTMConnectLiveLinkSourceEditor);
-    }
-    return ActiveSourceEditor;
+    return ULiveLinkSourceFactory::EMenuType::SubPanel;
 }
 
-TSharedPtr<ILiveLinkSource> UQTMConnectLiveLinkSourceFactory::OnSourceCreationPanelClosed(bool bMakeSource)
+TSharedPtr<SWidget> UQTMConnectLiveLinkSourceFactory::BuildCreationPanel(FOnLiveLinkSourceCreated OnLiveLinkSourceCreated) const
 {
-    TSharedPtr<FQTMConnectLiveLinkSource> NewSource = nullptr;
+    return SNew(SQTMConnectLiveLinkSourceEditor)
+        .OnPropertiesSelected(FQTMConnectLiveLinkSourceEditorPropertiesSelected::CreateUObject(this, &UQTMConnectLiveLinkSourceFactory::OnPropertiesSelected, OnLiveLinkSourceCreated));
+}
 
-    if (bMakeSource && ActiveSourceEditor.IsValid())
-    {
-        QTMConnectLiveLinkSettings settings;
-        settings.IpAddress = ActiveSourceEditor->GetIpAddress();
-        settings.Port = ActiveSourceEditor->GetPort();
+TSharedPtr<ILiveLinkSource> UQTMConnectLiveLinkSourceFactory::CreateSource(const FString& ConnectionString) const
+{
+    QTMConnectLiveLinkSettings settings = QTMConnectLiveLinkSettings::FromString(ConnectionString);
+    TSharedPtr<FQTMConnectLiveLinkSource> linkSource = MakeShareable(new FQTMConnectLiveLinkSource(settings));
+    return linkSource;
+}
 
-        NewSource = MakeShared<FQTMConnectLiveLinkSource>(settings);
-    }
-
-    ActiveSourceEditor = nullptr;
-    return NewSource;
+void UQTMConnectLiveLinkSourceFactory::OnPropertiesSelected(QTMConnectLiveLinkSettings settings, FOnLiveLinkSourceCreated OnLiveLinkSourceCreated) const
+{
+    FString settingsString = settings.ToString();
+    TSharedPtr<FQTMConnectLiveLinkSource> linkSource = MakeShareable(new FQTMConnectLiveLinkSource(settings));
+    OnLiveLinkSourceCreated.ExecuteIfBound(linkSource, MoveTemp(settingsString));
 }
 
 #undef LOCTEXT_NAMESPACE

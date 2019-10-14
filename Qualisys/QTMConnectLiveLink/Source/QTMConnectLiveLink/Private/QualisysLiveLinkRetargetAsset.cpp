@@ -127,9 +127,9 @@ FVector GetTargetBoneDir(const FName& BoneName)
     return FVector(0, 0, 0);
 }
 
-void UQualisysLiveLinkRetargetAsset::BuildPoseForSubject(float DeltaTime, const FLiveLinkSubjectFrame& InFrame, FCompactPose& OutPose, FBlendedCurve& OutCurve)
+void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime, const FLiveLinkSkeletonStaticData* InSkeletonData, const FLiveLinkAnimationFrameData* InFrameData, FCompactPose& OutPose)
 {
-    const auto& SourceBoneNames = InFrame.RefSkeleton.GetBoneNames();
+    const auto& SourceBoneNames = InSkeletonData->GetBoneNames();
 
     /* Get the target bone names */
     TArray<FName, TMemStackAllocator<>> TargetBoneNames;
@@ -150,16 +150,16 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseForSubject(float DeltaTime, const 
     }
 
     const auto SourceLeftLegLength = (
-        InFrame.Transforms[SourceBoneNames.Find("LeftUpLeg")].GetTranslation() +
-        InFrame.Transforms[SourceBoneNames.Find("LeftLeg")].GetTranslation() +
-        InFrame.Transforms[SourceBoneNames.Find("LeftFoot")].GetTranslation() +
-        InFrame.Transforms[SourceBoneNames.Find("LeftToeBase")].GetTranslation()).Size();
+        InFrameData->Transforms[SourceBoneNames.Find("LeftUpLeg")].GetTranslation() +
+        InFrameData->Transforms[SourceBoneNames.Find("LeftLeg")].GetTranslation() +
+        InFrameData->Transforms[SourceBoneNames.Find("LeftFoot")].GetTranslation() +
+        InFrameData->Transforms[SourceBoneNames.Find("LeftToeBase")].GetTranslation()).Size();
 
     const auto SourceRightLegLength = (
-        InFrame.Transforms[SourceBoneNames.Find("RightUpLeg")].GetTranslation() +
-        InFrame.Transforms[SourceBoneNames.Find("RightLeg")].GetTranslation() +
-        InFrame.Transforms[SourceBoneNames.Find("RightFoot")].GetTranslation() +
-        InFrame.Transforms[SourceBoneNames.Find("RightToeBase")].GetTranslation()).Size();
+        InFrameData->Transforms[SourceBoneNames.Find("RightUpLeg")].GetTranslation() +
+        InFrameData->Transforms[SourceBoneNames.Find("RightLeg")].GetTranslation() +
+        InFrameData->Transforms[SourceBoneNames.Find("RightFoot")].GetTranslation() +
+        InFrameData->Transforms[SourceBoneNames.Find("RightToeBase")].GetTranslation()).Size();
 
     const auto SourceAvgLegLength = ((SourceLeftLegLength + SourceRightLegLength) / 2.0);
 
@@ -186,7 +186,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseForSubject(float DeltaTime, const 
     for (int32 i = 0; i < TargetBoneNames.Num(); ++i)
     {
         const auto& BoneName = TargetBoneNames[i];
-        const auto& BoneTransform = InFrame.Transforms[i];
+        const auto& BoneTransform = InFrameData->Transforms[i];
 
         const auto BoneIndex = GetCompactPoseBoneIndex(BoneName, OutPose);
 

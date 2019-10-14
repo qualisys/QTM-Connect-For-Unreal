@@ -14,7 +14,7 @@ class QTMCONNECTLIVELINK_API UQualisysLiveLinkRetargetAsset : public ULiveLinkRe
     GENERATED_UCLASS_BODY()
 
     virtual void Initialize() override;
-    virtual void BuildPoseForSubject(float DeltaTime, const FLiveLinkSubjectFrame& InFrame, FCompactPose& OutPose, FBlendedCurve& OutCurve) override;
+    virtual void BuildPoseFromAnimationData(float DeltaTime, const FLiveLinkSkeletonStaticData* InSkeletonData, const FLiveLinkAnimationFrameData* InFrameData, FCompactPose& OutPose);
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Mapping")

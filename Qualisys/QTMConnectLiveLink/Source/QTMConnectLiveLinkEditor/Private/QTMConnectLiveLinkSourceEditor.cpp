@@ -14,6 +14,8 @@ SQTMConnectLiveLinkSourceEditor::~SQTMConnectLiveLinkSourceEditor()
 
 void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
 {
+    OnPropertiesSelected = Args._OnPropertiesSelected;
+
     ChildSlot
     [
         SNew(SBox)
@@ -61,8 +63,25 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                     .OnValueChanged(this, &SQTMConnectLiveLinkSourceEditor::OnPortChanged)
                 ]
             ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
+                SNew(SButton)
+                .Text(LOCTEXT("Create", "Create"))
+                .OnClicked(this, &SQTMConnectLiveLinkSourceEditor::CreateSource)
+            ]
         ]
     ];
+}
+
+FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
+{
+    QTMConnectLiveLinkSettings settings;
+    settings.IpAddress = this->GetIpAddress();
+    settings.Port = this->GetPort();
+    OnPropertiesSelected.ExecuteIfBound(settings);
+    return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE

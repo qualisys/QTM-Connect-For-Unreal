@@ -2,6 +2,8 @@
 //
 #include "QTMConnectLiveLinkSource.h"
 #include "ILiveLinkClient.h"
+#include "LiveLinkTypes.h"
+#include "Roles/LiveLinkAnimationRole.h"
 
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
@@ -16,6 +18,27 @@
 #define QTM_STREAMING_PORT 22222
 
 #pragma optimize("", off)
+
+QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString& settingsString)
+{
+    QTMConnectLiveLinkSettings settings;
+    if (!FParse::Value(*settingsString, TEXT("IpAddress="), settings.IpAddress))
+    {
+        settings.IpAddress = "127.0.0.1";
+    }
+    if (!FParse::Value(*settingsString, TEXT("Port="), settings.Port))
+    {
+        settings.IpAddress = "-1";
+    }
+    return settings;
+}
+
+const FString QTMConnectLiveLinkSettings::ToString() const
+{
+    FString settingsString = FString::Printf(TEXT("IpAddress=\"%s\""), *IpAddress);
+    settingsString.Append(FString::Printf(TEXT("Port=\"%d\""), Port));
+    return settingsString;
+}
 
 FQTMConnectLiveLinkSource::FQTMConnectLiveLinkSource(const QTMConnectLiveLinkSettings& settings)
     : Settings(settings)
@@ -51,7 +74,7 @@ void FQTMConnectLiveLinkSource::ReceiveClient(ILiveLinkClient* InClient, FGuid I
 }
 
 
-bool FQTMConnectLiveLinkSource::IsSourceStillValid()
+bool FQTMConnectLiveLinkSource::IsSourceStillValid() const
 {
     // Source is valid if we have a valid thread
     bool bIsSourceValid = !Stopping && Thread != nullptr;
@@ -220,7 +243,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     continue;
                 }
 
-                FLiveLinkFrameData subjectFrame;
+                const FName skeletonName = mRTProtocol->GetSkeletonName(skeletonIndex);
+                
+                FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
+                FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
                 TArray<FTransform>& transforms = subjectFrame.Transforms;
                 transforms.SetNumUninitialized(segmentCount);
 
@@ -238,14 +264,13 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                 subjectFrame.WorldTime = worldTime;
 
-                const FName skeletonName = mRTProtocol->GetSkeletonName(skeletonIndex);
-
-                Client->PushSubjectData(SourceGuid, skeletonName, subjectFrame);
+                Client->PushSubjectFrameData_AnyThread({ SourceGuid, skeletonName }, MoveTemp(frameDataStruct));
             }
             const auto rigidBodyCount = packet->Get6DOFBodyCount();
             for (unsigned int rigidBodyIndex = 0; rigidBodyIndex < rigidBodyCount; rigidBodyIndex++)
             {
-                FLiveLinkFrameData subjectFrame;
+                FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
+                FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
                 TArray<FTransform>& transforms = subjectFrame.Transforms;
                 transforms.SetNumUninitialized(1);
 
@@ -268,11 +293,9 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                     const FName rigidBodyName = mRTProtocol->Get6DOFBodyName(rigidBodyIndex);
 
-                    Client->PushSubjectData(SourceGuid, rigidBodyName, subjectFrame);
+                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, rigidBodyName }, MoveTemp(frameDataStruct));
                 }           
             }
-
-            // TODO::: Also push something to ActiveEditorCamera?
         }
     }
 
@@ -304,13 +327,13 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
             boneParents[segmentIndex] = segment.parentIndex;
         }
 
-        FLiveLinkRefSkeleton subjectRefSkeleton;
+        FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkSkeletonStaticData::StaticStruct());
+        FLiveLinkSkeletonStaticData& subjectRefSkeleton = *subjectDataStruct.Cast<FLiveLinkSkeletonStaticData>();
         subjectRefSkeleton.SetBoneNames(boneNames);
         subjectRefSkeleton.SetBoneParents(boneParents);
+        Client->PushSubjectStaticData_AnyThread({ SourceGuid, skeletonName }, ULiveLinkAnimationRole::StaticClass(), MoveTemp(subjectDataStruct));
 
-        Client->PushSubjectSkeleton(SourceGuid, skeletonName, subjectRefSkeleton);
-
-        EncounteredSubjects.Add(skeletonName);
+        EncounteredSubjects.Add({ SourceGuid, skeletonName });
     }
     const auto rigidBodyCount = mRTProtocol->Get6DOFBodyCount();
     for (unsigned int rigidBodyIndex = 0; rigidBodyIndex < rigidBodyCount; rigidBodyIndex++)
@@ -325,13 +348,14 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
         boneNames[0] = "Bone";
         boneParents[0] = -1;
 
-        FLiveLinkRefSkeleton subjectRefSkeleton;
+
+        FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkSkeletonStaticData::StaticStruct());
+        FLiveLinkSkeletonStaticData& subjectRefSkeleton = *subjectDataStruct.Cast<FLiveLinkSkeletonStaticData>();
         subjectRefSkeleton.SetBoneNames(boneNames);
         subjectRefSkeleton.SetBoneParents(boneParents);
+        Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkAnimationRole::StaticClass(), MoveTemp(subjectDataStruct));
 
-        Client->PushSubjectSkeleton(SourceGuid, name, subjectRefSkeleton);
-
-        EncounteredSubjects.Add(name);
+        EncounteredSubjects.Add({ SourceGuid, name });
     }
 }
 
@@ -340,7 +364,9 @@ void FQTMConnectLiveLinkSource::ClearSubjects()
     // Clear the subject map on stop
     for (const auto &subject : EncounteredSubjects)
     {
-        Client->ClearSubject(subject);
+        if (Stopping)
+            break;
+        Client->RemoveSubject_AnyThread(subject);
     }
     EncounteredSubjects.Empty();
 }

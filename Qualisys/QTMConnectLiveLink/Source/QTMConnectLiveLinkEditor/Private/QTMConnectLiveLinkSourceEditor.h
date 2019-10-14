@@ -2,6 +2,8 @@
 //
 #pragma once
 
+#include "QtmConnectLiveLinkSource.h"
+
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Views/SListView.h"
 #include "IMessageContext.h"
@@ -10,15 +12,19 @@
 #include "Misc/Guid.h"
 #include "Widgets/Input/SEditableTextBox.h"
 
+DECLARE_DELEGATE_OneParam(FQTMConnectLiveLinkSourceEditorPropertiesSelected, QTMConnectLiveLinkSettings);
+
 class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCompoundWidget
 {
     SLATE_BEGIN_ARGS(SQTMConnectLiveLinkSourceEditor)
     {
     }
 
+    SLATE_EVENT(FQTMConnectLiveLinkSourceEditorPropertiesSelected, OnPropertiesSelected)
+
     SLATE_END_ARGS()
 
-    const unsigned short defaultPort = 9456;
+    const unsigned short defaultPort = -1;
 
     SQTMConnectLiveLinkSourceEditor()
     {
@@ -53,4 +59,6 @@ private:
 
     TSharedPtr<SEditableTextBox> IpAddress;
 
+    FReply CreateSource() const;
+    FQTMConnectLiveLinkSourceEditorPropertiesSelected OnPropertiesSelected;
 };

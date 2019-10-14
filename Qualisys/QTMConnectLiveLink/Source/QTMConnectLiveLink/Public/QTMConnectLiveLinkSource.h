@@ -15,11 +15,14 @@
 class ILiveLinkClient;
 class CRTProtocol;
 
-class QTMConnectLiveLinkSettings
+class QTMCONNECTLIVELINK_API QTMConnectLiveLinkSettings
 {
 public:
+    static QTMConnectLiveLinkSettings FromString(const FString& settingsString);
+    const FString ToString() const;
+
     FString IpAddress;
-    unsigned short Port;
+    short Port;
 };
 
 class QTMCONNECTLIVELINK_API FQTMConnectLiveLinkSource : public ILiveLinkSource, public FRunnable
@@ -34,7 +37,7 @@ public:
 	
 	virtual void ReceiveClient(ILiveLinkClient* InClient, FGuid InSourceGuid) override;
 
-	virtual bool IsSourceStillValid() override;
+	virtual bool IsSourceStillValid() const override;
 
 	virtual bool RequestSourceShutdown() override;
 
@@ -85,7 +88,7 @@ private:
 	FString ThreadName;
 
 	// List of subjects we've already encountered
-	TArray<FName> EncounteredSubjects;
+    TArray<FLiveLinkSubjectKey> EncounteredSubjects;
 
     std::shared_ptr<CRTProtocol> mRTProtocol;
 };
