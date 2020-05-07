@@ -22,7 +22,7 @@
     },
     {
       "Name": "QTMConnectLiveLinkEditor",
-      "Type": "Developer",
+      "Type": "Editor",
       "LoadingPhase": "Default",
       "WhitelistPlatforms": [
         "Win64"
