@@ -5,6 +5,7 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, 
 ## Installation of the plugin
 
 *Note that the pre-built dll's for each version can be found here:*
+- *[UE 4.25](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.25)*
 - *[UE 4.24](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.24)*
 - *[UE 4.23](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.23)*
 - *[UE 4.22](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.22)*
