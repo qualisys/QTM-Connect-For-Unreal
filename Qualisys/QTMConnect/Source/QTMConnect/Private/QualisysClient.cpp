@@ -16,6 +16,7 @@
 #include <Windows/HideWindowsPlatformTypes.h>
 
 #include <numeric>
+#include <cmath>
 
 #define LOCTEXT_NAMESPACE "QTMConnect"
 
