@@ -69,6 +69,9 @@ public:
 	void HandleReceivedData(TSharedPtr<TArray<uint8>, ESPMode::ThreadSafe> ReceivedData);
 
 private:
+	void DisconnectFromQTM();
+
+private:
     QTMConnectLiveLinkSettings Settings;
 
 	ILiveLinkClient* Client;

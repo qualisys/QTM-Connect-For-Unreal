@@ -67,6 +67,19 @@ FQTMConnectLiveLinkSource::~FQTMConnectLiveLinkSource()
         delete Thread;
         Thread = nullptr;
     }
+
+    DisconnectFromQTM();
+
+}
+
+void FQTMConnectLiveLinkSource::DisconnectFromQTM()
+{
+    if (mRTProtocol != nullptr)
+    {
+        mRTProtocol->StreamFramesStop();
+        mRTProtocol->Disconnect();
+        mRTProtocol.reset();
+    }
 }
 
 void FQTMConnectLiveLinkSource::ReceiveClient(ILiveLinkClient* InClient, FGuid InSourceGuid)
@@ -106,13 +119,6 @@ void FQTMConnectLiveLinkSource::Start()
 void FQTMConnectLiveLinkSource::Stop()
 {
     Stopping = true;
-
-    if (mRTProtocol)
-    {
-        mRTProtocol->StreamFramesStop();
-        mRTProtocol->Disconnect();
-        mRTProtocol = nullptr;
-    }
 
     SourceStatus = LOCTEXT("SourceStatus_NotConnected", "Not connected");
 }
@@ -293,6 +299,17 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     case CRTPacket::EventCaptureStopped:
                     case CRTPacket::EventCalibrationStopped:
                     case CRTPacket::EventRTfromFileStopped:
+                    case CRTPacket::EventConnected:
+                    case CRTPacket::EventCaptureStarted:
+                    case CRTPacket::EventCalibrationStarted:
+                    case CRTPacket::EventRTfromFileStarted:
+
+                        if (startedStreaming)
+                        {
+                            DisconnectFromQTM();
+                            autoDiscover = false;
+                        }
+
                         ClearSubjects();
                         readSettings = false;
                         startedStreaming = false;
@@ -300,6 +317,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                     case CRTPacket::EventQTMShuttingDown:
                         Stop();
+                        DisconnectFromQTM();
                         break;
                 }
             }
