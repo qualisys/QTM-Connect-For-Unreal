@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
 //
 #pragma once
 
@@ -67,10 +67,6 @@ public:
     // IP address to the machine running Qualisys Track Manager
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
     FString IPAddressToQTMServer;
-
-    // UDP port for streaming (0 = uses TCP for streaming instead of UDP)
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
-    int UdpPort;
 
     // Streaming rate (0 = As fast as possible)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")

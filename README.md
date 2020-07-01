@@ -5,10 +5,9 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, 
 ## Installation of the plugin
 
 *Note that the pre-built dll's for each version can be found here:*
+- *[UE 4.25](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.25)*
 - *[UE 4.24](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.24)*
-- *[UE 4.23](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.23)*
-- *[UE 4.22](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.22)*
-- *[UE 4.21](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.21)*
+- *Note: Support for UE4.23 and below is also available but prebuilt binaries are currently not updated from lastest commits.*
 - *Note: If the plugin should be used in a unsupported Unreal Engine version then put it in the `Unreal project folder\Plugins` and rebuild project.*
 
 1. Copy the directory `.\Prebuilt\Qualisys` to `C:\Program Files\Epic Games\UE_4.xx\Engine\Plugins`.
@@ -35,11 +34,13 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, 
 12. Click Compile, and you should see the mesh moving in the preview window. 
 13. Drag the animation blueprint you created in step 8 into your scene, then click Play.
 
+*Note: Avoid mixing the LiveLink plugin data with the QualisysClient plugin. Synchronization of data might differ.*
+
 ## How to use the QualisysClient Actor object and QualisysRigidBody ActorComponent object
 
 1. The QualisysClient object is available in the UE4 Modes panel. This object handles the data streaming between QTM and Unreal.
 2. Drag and drop the QualisysClient object in the world.
-3. Select the QualisysClient instance and edit it's properties. (IP address of the machine running QTM, UdpPort to stream on (0 will use TCP streaming) and stream rate (StreamRate of 0 will stream data as quick as possible).
+3. Select the QualisysClient instance and edit it's properties. (IP address of the machine running QTM, and stream rate (StreamRate of 0 will stream data as quick as possible).
 4. Add a Qualisys RigidBody component to a object in the World Outliner pane.
 5. Make sure the object is set to moveable.
 6. Set the RigidBody name to the name of the RigidBody in QTM.
