@@ -68,10 +68,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
     FString IPAddressToQTMServer;
 
-    // UDP port for streaming (0 = uses TCP for streaming instead of UDP)
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
-    int UdpPort;
-
     // Streaming rate (0 = As fast as possible)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Qualisys")
     int StreamRate;
