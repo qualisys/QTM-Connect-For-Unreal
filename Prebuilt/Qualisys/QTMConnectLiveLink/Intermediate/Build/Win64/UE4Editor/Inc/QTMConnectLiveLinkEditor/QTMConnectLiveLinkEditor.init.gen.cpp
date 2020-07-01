@@ -20,7 +20,7 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkEditor_init() {}
 				"/Script/QTMConnectLiveLinkEditor",
 				nullptr,
 				0,
-				PKG_CompiledIn | 0x00000080,
+				PKG_CompiledIn | 0x00000040,
 				0x3B12ABF3,
 				0x3CCB641B,
 				METADATA_PARAMS(nullptr, 0)

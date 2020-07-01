@@ -403,10 +403,6 @@ static struct FScriptStruct_QTMConnect_StaticRegisterNativesFQualisysTrajectoryI
 #endif
 		static const UE4CodeGen_Private::FUnsizedIntPropertyParams NewProp_StreamRate;
 #if WITH_METADATA
-		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_UdpPort_MetaData[];
-#endif
-		static const UE4CodeGen_Private::FUnsizedIntPropertyParams NewProp_UdpPort;
-#if WITH_METADATA
 		static const UE4CodeGen_Private::FMetaDataPairParam NewProp_IPAddressToQTMServer_MetaData[];
 #endif
 		static const UE4CodeGen_Private::FStrPropertyParams NewProp_IPAddressToQTMServer;
@@ -472,15 +468,6 @@ static struct FScriptStruct_QTMConnect_StaticRegisterNativesFQualisysTrajectoryI
 #endif
 	const UE4CodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UClass_AQualisysClient_Statics::NewProp_StreamRate = { "StreamRate", nullptr, (EPropertyFlags)0x0010000000000005, UE4CodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AQualisysClient, StreamRate), METADATA_PARAMS(Z_Construct_UClass_AQualisysClient_Statics::NewProp_StreamRate_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AQualisysClient_Statics::NewProp_StreamRate_MetaData)) };
 #if WITH_METADATA
-	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AQualisysClient_Statics::NewProp_UdpPort_MetaData[] = {
-		{ "Category", "Qualisys" },
-		{ "Comment", "// UDP port for streaming (0 = uses TCP for streaming instead of UDP)\n" },
-		{ "ModuleRelativePath", "Classes/QualisysClient.h" },
-		{ "ToolTip", "UDP port for streaming (0 = uses TCP for streaming instead of UDP)" },
-	};
-#endif
-	const UE4CodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UClass_AQualisysClient_Statics::NewProp_UdpPort = { "UdpPort", nullptr, (EPropertyFlags)0x0010000000000005, UE4CodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(AQualisysClient, UdpPort), METADATA_PARAMS(Z_Construct_UClass_AQualisysClient_Statics::NewProp_UdpPort_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AQualisysClient_Statics::NewProp_UdpPort_MetaData)) };
-#if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AQualisysClient_Statics::NewProp_IPAddressToQTMServer_MetaData[] = {
 		{ "Category", "Qualisys" },
 		{ "Comment", "// IP address to the machine running Qualisys Track Manager\n" },
@@ -504,7 +491,6 @@ static struct FScriptStruct_QTMConnect_StaticRegisterNativesFQualisysTrajectoryI
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AQualisysClient_Statics::NewProp_DebugDrawingTrajectories,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AQualisysClient_Statics::NewProp_DebugDrawingRigidBodies,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AQualisysClient_Statics::NewProp_StreamRate,
-		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AQualisysClient_Statics::NewProp_UdpPort,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AQualisysClient_Statics::NewProp_IPAddressToQTMServer,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AQualisysClient_Statics::NewProp_AutoDiscoverQTMServer,
 	};
@@ -535,7 +521,7 @@ static struct FScriptStruct_QTMConnect_StaticRegisterNativesFQualisysTrajectoryI
 		}
 		return OuterClass;
 	}
-	IMPLEMENT_CLASS(AQualisysClient, 1328121732);
+	IMPLEMENT_CLASS(AQualisysClient, 2206259048);
 	template<> QTMCONNECT_API UClass* StaticClass<AQualisysClient>()
 	{
 		return AQualisysClient::StaticClass();

@@ -21,8 +21,8 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLink_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000000,
-				0x421675A4,
-				0x6234CB53,
+				0xDE7E6A97,
+				0x99B46397,
 				METADATA_PARAMS(nullptr, 0)
 			};
 			UE4CodeGen_Private::ConstructUPackage(ReturnPackage, PackageParams);

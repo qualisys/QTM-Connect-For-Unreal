@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
 //
 #pragma once
 
@@ -18,11 +18,15 @@ class CRTProtocol;
 class QTMCONNECTLIVELINK_API QTMConnectLiveLinkSettings
 {
 public:
+	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false)
+	{
+	}
+
     static QTMConnectLiveLinkSettings FromString(const FString& settingsString);
-    const FString ToString() const;
+    FString ToString() const;
 
     FString IpAddress;
-    short Port;
+	bool AutoDiscover;
 };
 
 class QTMCONNECTLIVELINK_API FQTMConnectLiveLinkSource : public ILiveLinkSource, public FRunnable
@@ -63,6 +67,9 @@ public:
 	// End FRunnable Interface
 
 	void HandleReceivedData(TSharedPtr<TArray<uint8>, ESPMode::ThreadSafe> ReceivedData);
+
+private:
+	void DisconnectFromQTM();
 
 private:
     QTMConnectLiveLinkSettings Settings;

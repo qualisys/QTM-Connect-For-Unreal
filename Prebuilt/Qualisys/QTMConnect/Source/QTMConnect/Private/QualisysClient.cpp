@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
 //
 #include "QualisysClient.h"
 
@@ -16,6 +16,7 @@
 #include <Windows/HideWindowsPlatformTypes.h>
 
 #include <numeric>
+#include <cmath>
 
 #define LOCTEXT_NAMESPACE "QTMConnect"
 
@@ -27,7 +28,6 @@ AQualisysClient::AQualisysClient(const FObjectInitializer& ObjectInitializer) :
     Super(ObjectInitializer),
     AutoDiscoverQTMServer(true),
     IPAddressToQTMServer("127.0.0.1"),
-    UdpPort(6789),
     StreamRate(0),
     DebugDrawingRigidBodies(false),
     DebugDrawingTrajectories(false),
@@ -112,8 +112,7 @@ void AQualisysClient::InitializeQualisysClient()
         }
 
         const std::string serverAddr(TCHAR_TO_ANSI(*IPAddressToQTMServer));
-        unsigned short sUdpPort = UdpPort;
-        auto connected = mRtProtocol->Connect(serverAddr.c_str(), QTM_STREAMING_PORT, &sUdpPort);
+        auto connected = mRtProtocol->Connect(serverAddr.c_str(), QTM_STREAMING_PORT);
         if (!connected)
         {
             GLog->Logf(TEXT("AQualisysClient::InitializeQualisysClient: Connection to QTM failed: %s"), serverAddr.c_str());
@@ -149,7 +148,7 @@ void AQualisysClient::InitializeQualisysClient()
     }
 
     const auto streamRateType = (StreamRate <= 0) ? CRTProtocol::RateAllFrames : CRTProtocol::RateFrequency;
-    auto streaming = mRtProtocol->StreamFrames(streamRateType, StreamRate, UdpPort, nullptr, componentsToStream);
+    auto streaming = mRtProtocol->StreamFrames(streamRateType, StreamRate, 0, nullptr, componentsToStream);
     if (!streaming)
     {
         GLog->Logf(TEXT("AQualisysClient::InitializeQualisysClient: StreamFrames failed"));
