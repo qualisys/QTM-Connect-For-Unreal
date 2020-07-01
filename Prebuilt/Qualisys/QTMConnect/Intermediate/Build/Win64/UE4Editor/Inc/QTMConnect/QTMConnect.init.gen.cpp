@@ -21,7 +21,7 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnect_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000000,
-				0x6B4AC1CD,
+				0xC9C93DD4,
 				0x1A1C6EF3,
 				METADATA_PARAMS(nullptr, 0)
 			};
