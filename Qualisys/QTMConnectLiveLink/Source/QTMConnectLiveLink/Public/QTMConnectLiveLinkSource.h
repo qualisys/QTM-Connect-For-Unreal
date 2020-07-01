@@ -18,11 +18,15 @@ class CRTProtocol;
 class QTMCONNECTLIVELINK_API QTMConnectLiveLinkSettings
 {
 public:
+	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false)
+	{
+	}
+
     static QTMConnectLiveLinkSettings FromString(const FString& settingsString);
-    const FString ToString() const;
+    FString ToString() const;
 
     FString IpAddress;
-    short Port;
+	bool AutoDiscover;
 };
 
 class QTMCONNECTLIVELINK_API FQTMConnectLiveLinkSource : public ILiveLinkSource, public FRunnable
