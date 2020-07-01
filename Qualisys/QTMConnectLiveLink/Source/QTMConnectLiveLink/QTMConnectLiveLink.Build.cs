@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2019 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
 //
 using Path = System.IO.Path;
 using UnrealBuildTool;
