@@ -26,17 +26,20 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     {
         settings.IpAddress = "127.0.0.1";
     }
-    if (!FParse::Value(*settingsString, TEXT("Port="), settings.Port))
+    settings.AutoDiscover = false;
+    FString autoDiscover;
+    if (!FParse::Value(*settingsString, TEXT("AutoDiscover="), autoDiscover))
     {
-        settings.IpAddress = "-1";
+        if (autoDiscover == "true")
+            settings.AutoDiscover = true;
     }
     return settings;
 }
 
-const FString QTMConnectLiveLinkSettings::ToString() const
+FString QTMConnectLiveLinkSettings::ToString() const
 {
     FString settingsString = FString::Printf(TEXT("IpAddress=\"%s\""), *IpAddress);
-    settingsString.Append(FString::Printf(TEXT("Port=\"%d\""), Port));
+    settingsString.Append(FString::Printf(TEXT("AutoDiscover=\"%d\""), AutoDiscover ? TEXT("true") : TEXT("false")));
     return settingsString;
 }
 
@@ -47,8 +50,6 @@ FQTMConnectLiveLinkSource::FQTMConnectLiveLinkSource(const QTMConnectLiveLinkSet
 {
     SourceType = LOCTEXT("QTMConnectLiveLinkSourceType", "QTM Connect LiveLink");
     SourceStatus = LOCTEXT("SourceStatus_NotConnected", "Not connected");
-    FString machineName(settings.IpAddress + ":" + FString::FromInt(settings.Port));
-    SourceMachineName = FText::FromString(machineName);
 }
 
 FQTMConnectLiveLinkSource::~FQTMConnectLiveLinkSource()
@@ -136,8 +137,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
     bool readSettings = false;
     bool startedStreaming = false;
 
-    unsigned short udpPort = Settings.Port;
-    const std::string serverAddr(TCHAR_TO_ANSI(*(Settings.IpAddress)));
+    float timecodeFrequency = 24;
+
+    bool autoDiscover = Settings.AutoDiscover;
+    std::string serverAddress(TCHAR_TO_ANSI(*(Settings.IpAddress)));
 
     while (!Stopping)
     {
@@ -147,7 +150,29 @@ uint32 FQTMConnectLiveLinkSource::Run()
         }
         if (!mRTProtocol->Connected())
         {
-            if (!mRTProtocol->Connect(serverAddr.c_str(), QTM_STREAMING_PORT, &udpPort))
+            if (autoDiscover)
+            {
+                if (mRTProtocol->DiscoverRTServer(0, false))
+                {
+                    const auto discoverResponses = mRTProtocol->GetNumberOfDiscoverResponses();
+                    if (discoverResponses >= 1)
+                    {
+                        char message[256];
+                        unsigned int addr;
+                        unsigned short basePort;
+                        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message, sizeof(message)))
+                        {
+                            char serverAddr[40];
+                            sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
+                            serverAddress = serverAddr;
+                        }
+                    }
+                }
+            }
+            SourceMachineName = FText::FromString(serverAddress.c_str());
+
+            unsigned short udpPort = 0;
+            if (!mRTProtocol->Connect(serverAddress.c_str(), QTM_STREAMING_PORT))
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 
@@ -184,7 +209,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
         if (!startedStreaming)
         {
-            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, udpPort, nullptr, (CRTProtocol::cComponentSkeleton | CRTProtocol::cComponent6d)))
+            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, 0, nullptr, (CRTProtocol::cComponent3d | CRTProtocol::cComponentSkeleton | CRTProtocol::cComponent6d | CRTProtocol::cComponentTimecode)))
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 

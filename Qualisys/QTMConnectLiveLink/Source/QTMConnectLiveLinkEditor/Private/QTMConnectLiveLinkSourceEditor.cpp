@@ -5,6 +5,7 @@
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "Widgets/Input/SCheckBox.h"
 
 #define LOCTEXT_NAMESPACE "QTMConnectLiveLinkSourceEditor"
 
@@ -23,6 +24,28 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
         .HeightOverride(220)
         [
             SNew(SVerticalBox)
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("AutoDiscover", "AutoDiscover"))
+                ]
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(AutoDiscoverCB, SCheckBox)
+                    .IsChecked(ECheckBoxState::Checked)
+                ]
+            ]
+
             + SVerticalBox::Slot()
             .AutoHeight()
             .Padding(3.0f)
@@ -39,30 +62,12 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .HAlign(HAlign_Fill)
                 .FillWidth(0.5f)
                 [
-                    SAssignNew(IpAddress, SEditableTextBox).Text(LOCTEXT("DefaultQTMIpAddress", "127.0.0.1"))
+                    SAssignNew(IpAddress, SEditableTextBox)
+                    .Text(LOCTEXT("DefaultQTMIpAddress", "127.0.0.1"))
+                    .IsEnabled(&SQTMConnectLiveLinkSourceEditor::IsAutoConnect)
                 ]
             ]
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            .Padding(3.0f)
-            [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .HAlign(HAlign_Left)
-                .FillWidth(0.5f)
-                [
-                    SNew(STextBlock)
-                    .Text(LOCTEXT("QTMPort", "Udp Port"))
-                ]
-                + SHorizontalBox::Slot()
-                .HAlign(HAlign_Fill)
-                .FillWidth(0.5f)
-                [
-                    SNew(SNumericEntryBox<unsigned short>)
-                    .Value(this, &SQTMConnectLiveLinkSourceEditor::OnGetPort)
-                    .OnValueChanged(this, &SQTMConnectLiveLinkSourceEditor::OnPortChanged)
-                ]
-            ]
+
             + SVerticalBox::Slot()
             .AutoHeight()
             .Padding(3.0f)
@@ -79,7 +84,7 @@ FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
 {
     QTMConnectLiveLinkSettings settings;
     settings.IpAddress = this->GetIpAddress();
-    settings.Port = this->GetPort();
+    settings.AutoDiscover = this->GetAutoDiscover();
     OnPropertiesSelected.ExecuteIfBound(settings);
     return FReply::Handled();
 }

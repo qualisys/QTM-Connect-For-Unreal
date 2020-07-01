@@ -48,6 +48,9 @@ public class QTMConnectLiveLink : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
+                "LiveLink",
+                "LiveLinkInterface",
+                "TimeManagement"
             }
         );
 
