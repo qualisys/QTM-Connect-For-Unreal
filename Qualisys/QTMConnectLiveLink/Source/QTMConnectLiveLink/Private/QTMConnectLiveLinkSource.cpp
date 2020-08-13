@@ -19,7 +19,7 @@
 #define QTM_STREAMING_PORT 22222
 
 const FName markersParentName = "Markers";
-
+ 
 #pragma optimize("", off)
 
 QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString& settingsString)
@@ -370,46 +370,53 @@ uint32 FQTMConnectLiveLinkSource::Run()
             {
                 // Skeletons
                 const auto skeletonCount = packet->GetSkeletonCount();
-                for (unsigned int skeletonIndex = 0; skeletonIndex < skeletonCount; skeletonIndex++)
-                {
-                    const auto segmentCount = packet->GetSkeletonSegmentCount(skeletonIndex);
+				for (unsigned int skeletonIndex = 0; skeletonIndex < skeletonCount; skeletonIndex++)
+				{
+					const auto segmentCount = packet->GetSkeletonSegmentCount(skeletonIndex);
 
-                    if (segmentCount == 0)
-                    {
-                        continue;
-                    }
+					if (segmentCount == 0)
+					{
+						continue;
+					}
 
-                    const FName skeletonName = mRTProtocol->GetSkeletonName(skeletonIndex);
+					const FName skeletonName = mRTProtocol->GetSkeletonName(skeletonIndex);
 
-                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
-                    FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
-                    TArray<FTransform>& transforms = subjectFrame.Transforms;
-                    transforms.SetNumUninitialized(segmentCount);
+					FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
+					FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
+					TArray<FTransform>& transforms = subjectFrame.Transforms;
+					transforms.SetNumUninitialized(segmentCount);
 
-                    for (unsigned int segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++)
-                    {
-                        CRTProtocol::SSettingsSkeletonSegment settings;
-                        mRTProtocol->GetSkeletonSegment(skeletonIndex, segmentIndex, &settings);
+					for (unsigned int segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++)
+					{
 
-                        CRTPacket::SSkeletonSegment segment;
-                        packet->GetSkeletonSegment(skeletonIndex, segmentIndex, segment);
+						CRTProtocol::SSettingsSkeletonSegment settings;
+						mRTProtocol->GetSkeletonSegment(skeletonIndex, segmentIndex, &settings);
 
-                        auto segmentRotation = FQuat(segment.rotationX, -segment.rotationY, -segment.rotationZ, segment.rotationW) * FQuat(settings.rotationX, -settings.rotationY, -settings.rotationZ, settings.rotationW).Inverse();
+						CRTPacket::SSkeletonSegment segment;
+						packet->GetSkeletonSegment(skeletonIndex, segmentIndex, segment);
 
-                        while (settings.parentIndex != -1)
-                        {
-                            mRTProtocol->GetSkeletonSegment(skeletonIndex, settings.parentIndex, &settings);
+						FQuat	addRot = FQuat::MakeFromEuler(FVector(0, 0, 180));
+						auto segmentRotation = FQuat(0, 0, 0, 1);
+						auto segmentLocation = FVector(0, 0, 0);
 
-                            auto ancestorRotation = FQuat(settings.rotationX, -settings.rotationY, -settings.rotationZ, settings.rotationW);
 
-                            segmentRotation = ancestorRotation * segmentRotation * ancestorRotation.Inverse();
-                        }
+						if (settings.parentIndex == -1)
+						{
+							segmentRotation = FQuat(segment.rotationX, -segment.rotationY, segment.rotationZ, -segment.rotationW);
+							segmentLocation = FVector(segment.positionX, -segment.positionY, segment.positionZ) * positionScalingFactor;
+						}
+						else
+						{
+							segmentRotation = FQuat(-segment.rotationX, segment.rotationY, -segment.rotationZ, segment.rotationW);
+							segmentLocation = FVector(segment.positionX, -segment.positionY, segment.positionZ) * positionScalingFactor;
+						}
 
-                        const auto segmentLocation = FVector(-segment.positionX, segment.positionY, segment.positionZ) * positionScalingFactor;
-                        const auto segmentScale = FVector(1.0, 1.0, 1.0);
+						const auto segmentScale = FVector(1.0, 1.0, 1.0);
 
-                        transforms[segmentIndex] = FTransform(segmentRotation, segmentLocation, segmentScale);
-                    }
+						transforms[segmentIndex] = FTransform(segmentRotation, segmentLocation, segmentScale);
+
+
+					}
 
                     subjectFrame.WorldTime = worldTime;
                     subjectFrame.MetaData.SceneTime = sceneTime;
