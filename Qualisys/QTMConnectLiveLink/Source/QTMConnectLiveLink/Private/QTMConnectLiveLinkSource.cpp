@@ -168,7 +168,7 @@ float CalculateTimecodeFrequency(std::shared_ptr<CRTProtocol> rtProtocol)
     CRTProtocol::EProcessingActions eRtProcessingActions;
     CRTProtocol::EProcessingActions eReprocessingActions;
 
-    rtProtocol->GetSystemSettings(frequency, captureTime, startOnTrig, trigNo, trigNc, trigSoftware, eProcessingActions, eRtProcessingActions, eReprocessingActions);
+    rtProtocol->GetGeneralSettings(frequency, captureTime, startOnTrig, trigNo, trigNc, trigSoftware, eProcessingActions, eRtProcessingActions, eReprocessingActions);
 
     bool bEnabled; CRTProtocol::ESignalSource eSignalSource;
     bool bSignalModePeriodic; unsigned int nFreqMultiplier;
@@ -212,10 +212,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     const auto discoverResponses = mRTProtocol->GetNumberOfDiscoverResponses();
                     if (discoverResponses >= 1)
                     {
-                        char message[256];
                         unsigned int addr;
                         unsigned short basePort;
-                        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message, sizeof(message)))
+                        std::string message;
+                        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message))
                         {
                             char serverAddr[40];
                             sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
@@ -243,7 +243,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
             bool any3DSettings = false;
             bool anySkeletonSettings = false;
             bool any6DOFSettings = false;
-            if (mRTProtocol->ReadCameraSystemSettings() &&
+            if (mRTProtocol->ReadGeneralSettings() &&
                 mRTProtocol->Read3DSettings(any3DSettings) &&
                 mRTProtocol->ReadSkeletonSettings(anySkeletonSettings) &&
                 mRTProtocol->Read6DOFSettings(any6DOFSettings) &&
@@ -333,32 +333,31 @@ uint32 FQTMConnectLiveLinkSource::Run()
             FQualifiedFrameTime sceneTime;
 
             // There can only be one timecode present
-            const auto timecodeCount = packet->GetTimecodeCount();
-            if (timecodeCount > 0)
+            if (packet->IsTimeCodeAvailable())
             {
                 CRTPacket::ETimecodeType timecodeType;
-                if (packet->GetTimecodeType(0, timecodeType))
+                if (packet->GetTimecodeType(timecodeType))
                 {
                     switch (timecodeType)
                     {
                     case CRTPacket::TimecodeSMPTE:
                     {
                         int hours, minutes, seconds, frame;
-                        packet->GetTimecodeSMPTE(0, hours, minutes, seconds, frame);
+                        packet->GetTimecodeSMPTE(hours, minutes, seconds, frame);
                         ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeIRIG:
                     {
                         int year, day, hours, minutes, seconds, tenths;
-                        packet->GetTimecodeIRIG(0, year, day, hours, minutes, seconds, tenths);
+                        packet->GetTimecodeIRIG(year, day, hours, minutes, seconds, tenths);
                         ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, 0, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeCamerTime:
                     {
                         unsigned __int64 cameraTime;
-                        packet->GetTimecodeCameraTime(0, cameraTime);
+                        packet->GetTimecodeCameraTime(cameraTime);
                         const auto seconds = (cameraTime / 10000000);
                         ConstructLiveLinkTimeCode(timecodeFrequency, seconds, sceneTime);
                         break;
