@@ -98,10 +98,10 @@ void AQualisysClient::InitializeQualisysClient()
                 const auto discoverResponses = mRtProtocol->GetNumberOfDiscoverResponses();
                 if (discoverResponses >= 1)
                 {
-                    char message[256];
                     unsigned int addr;
                     unsigned short basePort;
-                    if (mRtProtocol->GetDiscoverResponse(0, addr, basePort, message, sizeof(message)))
+                    std::string message;
+                    if (mRtProtocol->GetDiscoverResponse(0, addr, basePort, message))
                     {
                         char serverAddr[40];
                         sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
