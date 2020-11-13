@@ -78,7 +78,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .FillWidth(0.5f)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("Stream3d", "Stream3d"))
+                    .Text(LOCTEXT("Stream3d", "Stream Markers"))
                 ]
                 + SHorizontalBox::Slot()
                 .HAlign(HAlign_Fill)
@@ -98,7 +98,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .FillWidth(0.5f)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("Stream6d", "Stream6d"))
+                    .Text(LOCTEXT("Stream6d", "Stream Rigid Bodies"))
                 ]
                 + SHorizontalBox::Slot()
                 .HAlign(HAlign_Fill)
@@ -118,7 +118,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .FillWidth(0.5f)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("StreamSkeleton", "StreamSkeleton"))
+                    .Text(LOCTEXT("StreamSkeleton", "Stream Skeletons"))
                 ]
                 + SHorizontalBox::Slot()
                 .HAlign(HAlign_Fill)
