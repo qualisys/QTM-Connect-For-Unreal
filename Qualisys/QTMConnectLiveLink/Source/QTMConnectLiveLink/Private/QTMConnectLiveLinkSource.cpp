@@ -36,6 +36,27 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
         if (autoDiscover == "true")
             settings.AutoDiscover = true;
     }
+    settings.Stream3d = true;
+    FString stream3d;
+    if (!FParse::Value(*settingsString, TEXT("Stream3d="), stream3d))
+    {
+        if (stream3d == "false")
+            settings.Stream3d = false;
+    }
+    settings.Stream6d = true;
+    FString stream6d;
+    if (!FParse::Value(*settingsString, TEXT("Stream6d="), stream6d))
+    {
+        if (stream6d == "false")
+            settings.Stream6d = false;
+    }
+    settings.StreamSkeleton = true;
+    FString streamSkeleton;
+    if (!FParse::Value(*settingsString, TEXT("StreamSkeleton="), streamSkeleton))
+    {
+        if (streamSkeleton == "false")
+            settings.StreamSkeleton = false;
+    }
     return settings;
 }
 
@@ -43,6 +64,9 @@ FString QTMConnectLiveLinkSettings::ToString() const
 {
     FString settingsString = FString::Printf(TEXT("IpAddress=\"%s\""), *IpAddress);
     settingsString.Append(FString::Printf(TEXT("AutoDiscover=\"%d\""), AutoDiscover ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("Stream3d=\"%d\""), Stream3d ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("Stream6d=\"%d\""), Stream6d ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%d\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
     return settingsString;
 }
 
@@ -270,7 +294,20 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
         if (!startedStreaming)
         {
-            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, 0, nullptr, (CRTProtocol::cComponent3d | CRTProtocol::cComponentSkeleton | CRTProtocol::cComponent6d | CRTProtocol::cComponentTimecode)))
+            auto components = CRTProtocol::cComponentTimecode;
+            if (Settings.Stream3d) 
+            {
+                components |= CRTProtocol::cComponent3d;
+            }
+            if (Settings.Stream6d)
+            {
+                components |= CRTProtocol::cComponent6d;
+            }
+            if (Settings.StreamSkeleton)
+            {
+                components |= CRTProtocol::cComponentSkeleton;
+            }
+            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, 0, nullptr, components))
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 
@@ -455,32 +492,35 @@ uint32 FQTMConnectLiveLinkSource::Run()
                 // Push marker transforms
                 const auto markerCount = packet->Get3DMarkerCount();
 
-                FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
-                FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
-                TArray<FTransform>& transforms = subjectFrame.Transforms;
-                transforms.SetNumUninitialized(markerCount);
-
-                for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
+                if (markerCount > 0)
                 {
-                    float x, y, z;
-                    if (packet->Get3DMarker(markerIndex, x, y, z))
+                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
+                    FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
+                    TArray<FTransform>& transforms = subjectFrame.Transforms;
+                    transforms.SetNumUninitialized(markerCount);
+
+                    for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
                     {
-                        if (isnan(x) || isnan(y) || isnan(z))
+                        float x, y, z;
+                        if (packet->Get3DMarker(markerIndex, x, y, z))
                         {
-                            continue;
+                            if (isnan(x) || isnan(y) || isnan(z))
+                            {
+                                continue;
+                            }
+
+                            FVector position(-x, y, z);
+                            position *= positionScalingFactor;
+                            FVector scale(1.0, 1.0, 1.0);
+                            transforms[markerIndex] = FTransform(FQuat::Identity, position, scale);
                         }
-
-                        FVector position(-x, y, z);
-                        position *= positionScalingFactor;
-                        FVector scale(1.0, 1.0, 1.0);
-                        transforms[markerIndex] = FTransform(FQuat::Identity, position, scale);
                     }
+
+                    subjectFrame.WorldTime = worldTime;
+                    subjectFrame.MetaData.SceneTime = sceneTime;
+
+                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, markersParentName }, MoveTemp(frameDataStruct));
                 }
-
-                subjectFrame.WorldTime = worldTime;
-                subjectFrame.MetaData.SceneTime = sceneTime;
-
-                Client->PushSubjectFrameData_AnyThread({ SourceGuid, markersParentName }, MoveTemp(frameDataStruct));
             }
 
         }
@@ -493,6 +533,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
 {
     ClearSubjects();
 
+    if (Settings.StreamSkeleton)
     {
         // Skeleton
         const auto skeletonCount = mRTProtocol->GetSkeletonCount();
@@ -525,6 +566,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
             EncounteredSubjects.Add({ SourceGuid, skeletonName });
         }
     }
+    if (Settings.Stream6d)
     {
         // Rigid body
         const auto rigidBodyCount = mRTProtocol->Get6DOFBodyCount();
@@ -550,6 +592,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
             EncounteredSubjects.Add({ SourceGuid, name });
         }
     }
+    if (Settings.Stream3d)
     {
         const auto markerCount = mRTProtocol->Get3DLabeledMarkerCount();
 
