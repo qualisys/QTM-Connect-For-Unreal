@@ -33,29 +33,25 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     FString autoDiscover;
     if (!FParse::Value(*settingsString, TEXT("AutoDiscover="), autoDiscover))
     {
-        if (autoDiscover == "true")
-            settings.AutoDiscover = true;
+        settings.AutoDiscover = autoDiscover == "true";
     }
-    settings.Stream3d = true;
+    settings.Stream3d = false;
     FString stream3d;
     if (!FParse::Value(*settingsString, TEXT("Stream3d="), stream3d))
     {
-        if (stream3d == "false")
-            settings.Stream3d = false;
+        settings.Stream3d = stream3d == "true";
     }
     settings.Stream6d = true;
     FString stream6d;
     if (!FParse::Value(*settingsString, TEXT("Stream6d="), stream6d))
     {
-        if (stream6d == "false")
-            settings.Stream6d = false;
+        settings.Stream6d = stream6d == "true";
     }
     settings.StreamSkeleton = true;
     FString streamSkeleton;
     if (!FParse::Value(*settingsString, TEXT("StreamSkeleton="), streamSkeleton))
     {
-        if (streamSkeleton == "false")
-            settings.StreamSkeleton = false;
+        settings.StreamSkeleton = streamSkeleton == "true";
     }
     return settings;
 }

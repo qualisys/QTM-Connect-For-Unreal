@@ -18,7 +18,7 @@ class CRTProtocol;
 class QTMCONNECTLIVELINK_API QTMConnectLiveLinkSettings
 {
 public:
-	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false), Stream3d(true), Stream6d(true), StreamSkeleton(true)
+	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false), Stream3d(false), Stream6d(true), StreamSkeleton(true)
 	{
 	}
 

@@ -35,7 +35,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .FillWidth(0.5f)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("AutoDiscover", "AutoDiscover"))
+                    .Text(LOCTEXT("AutoDiscover", "Auto Discover"))
                 ]
                 + SHorizontalBox::Slot()
                 .HAlign(HAlign_Fill)
@@ -85,7 +85,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .FillWidth(0.5f)
                 [
                     SAssignNew(Stream3dCB, SCheckBox)
-                    .IsChecked(ECheckBoxState::Checked)
+                    .IsChecked(ECheckBoxState::Unchecked)
                 ]
             ]
             + SVerticalBox::Slot()
