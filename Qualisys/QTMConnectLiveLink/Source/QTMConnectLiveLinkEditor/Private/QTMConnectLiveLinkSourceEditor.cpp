@@ -35,7 +35,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 .FillWidth(0.5f)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("AutoDiscover", "AutoDiscover"))
+                    .Text(LOCTEXT("AutoDiscover", "Auto Discover"))
                 ]
                 + SHorizontalBox::Slot()
                 .HAlign(HAlign_Fill)
@@ -72,6 +72,67 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
             .AutoHeight()
             .Padding(3.0f)
             [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("Stream3d", "Stream Markers"))
+                ]
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(Stream3dCB, SCheckBox)
+                    .IsChecked(ECheckBoxState::Unchecked)
+                ]
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("Stream6d", "Stream Rigid Bodies"))
+                ]
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(Stream6dCB, SCheckBox)
+                    .IsChecked(ECheckBoxState::Checked)
+                ]
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("StreamSkeleton", "Stream Skeletons"))
+                ]
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(StreamSkeletonCB, SCheckBox)
+                    .IsChecked(ECheckBoxState::Checked)
+                ]
+            ]
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
                 SNew(SButton)
                 .Text(LOCTEXT("Create", "Create"))
                 .OnClicked(this, &SQTMConnectLiveLinkSourceEditor::CreateSource)
@@ -85,6 +146,9 @@ FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
     QTMConnectLiveLinkSettings settings;
     settings.IpAddress = this->GetIpAddress();
     settings.AutoDiscover = this->GetAutoDiscover();
+    settings.Stream3d = this->GetStream3d();
+    settings.Stream6d = this->GetStream6d();
+    settings.StreamSkeleton = this->GetStreamSkeleton();
     OnPropertiesSelected.ExecuteIfBound(settings);
     return FReply::Handled();
 }
