@@ -266,10 +266,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
             if (mRTProtocol->ReadGeneralSettings() &&
                 mRTProtocol->Read3DSettings(any3DSettings) &&
                 mRTProtocol->ReadSkeletonSettings(anySkeletonSettings) &&
-                mRTProtocol->Read6DOFSettings(any6DOFSettings) &&
-                any3DSettings &&
-                anySkeletonSettings &&
-                any6DOFSettings)
+                mRTProtocol->Read6DOFSettings(any6DOFSettings))
             {
                 readSettings = true;
 
