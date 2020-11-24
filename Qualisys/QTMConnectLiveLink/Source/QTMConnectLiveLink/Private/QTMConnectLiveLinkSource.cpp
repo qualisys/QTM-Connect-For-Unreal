@@ -388,14 +388,12 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                     for (unsigned int segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++)
                     {
-
                         CRTProtocol::SSettingsSkeletonSegment settings;
                         mRTProtocol->GetSkeletonSegment(skeletonIndex, segmentIndex, &settings);
 
                         CRTPacket::SSkeletonSegment segment;
                         packet->GetSkeletonSegment(skeletonIndex, segmentIndex, segment);
 
-                        FQuat addRot = FQuat::MakeFromEuler(FVector(0, 0, 180));
                         auto segmentRotation = FQuat(0, 0, 0, 1);
                         auto segmentLocation = FVector(0, 0, 0);
 
