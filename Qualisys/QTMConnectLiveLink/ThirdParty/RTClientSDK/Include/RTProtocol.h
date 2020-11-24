@@ -59,11 +59,11 @@ public:
 
     struct SComponentOptions
     {
-		SComponentOptions() :
-			mAnalogChannels(nullptr),
-			mSkeletonGlobalData(false)
-		{
-		}
+        SComponentOptions() :
+            mAnalogChannels(nullptr),
+            mSkeletonGlobalData(false)
+        {
+        }
         char* mAnalogChannels;
         bool mSkeletonGlobalData;
     };
@@ -102,7 +102,9 @@ public:
         ModelMiqusHybrid     = 21,
         ModelArqusA5         = 22,
         ModelArqusA12        = 23,
-        ModelUnknown         = 24
+        ModelArqusA9         = 24,
+        ModelArqusA26         = 25,
+        ModelUnknown         = 26
     };
 
     enum ECameraMode
@@ -250,8 +252,8 @@ public:
         bool         bSyncOutNegativePolarity[3];
         float        fFocus;
         float        fAperture;
-		bool         autoExposureEnabled;
-		float        autoExposureCompensation;
+        bool         autoExposureEnabled;
+        float        autoExposureCompensation;
         int          autoWhiteBalance;
     };
 
@@ -783,7 +785,7 @@ public:
         unsigned int &nVideoRight,  unsigned int &nVideoBottom) const;
 
     bool GetCameraLensControlSettings(const unsigned int nCameraIndex, float* focus, float* aperture) const;
-	bool GetCameraAutoExposureSettings(const unsigned int nCameraIndex, bool* autoExposureEnabled, float* autoExposureCompensation) const;
+    bool GetCameraAutoExposureSettings(const unsigned int nCameraIndex, bool* autoExposureEnabled, float* autoExposureCompensation) const;
     bool GetCameraAutoWhiteBalance(const unsigned int nCameraIndex, bool* autoWhiteBalanceEnabled) const;
 
     EAxis        Get3DUpwardAxis() const;
@@ -879,7 +881,7 @@ public:
         const bool*         pbSyncOutNegativePolarity);
 
     bool SetCameraLensControlSettings(const unsigned int nCameraID, const float focus, const float aperture);
-	bool SetCameraAutoExposureSettings(const unsigned int nCameraID, const bool autoExposure, const float compensation);
+    bool SetCameraAutoExposureSettings(const unsigned int nCameraID, const bool autoExposure, const float compensation);
     bool SetCameraAutoWhiteBalance(const unsigned int nCameraID, const bool enable);
 
     bool SetImageSettings(
