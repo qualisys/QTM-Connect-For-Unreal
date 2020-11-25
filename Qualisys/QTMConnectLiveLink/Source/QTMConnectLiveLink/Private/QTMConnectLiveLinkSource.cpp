@@ -313,7 +313,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
         }
 
         CRTPacket::EPacketType packetType;
-        if (mRTProtocol->ReceiveRTPacket(packetType, false, 0) <= 0)
+        if (mRTProtocol->ReceiveRTPacket(packetType, false, 1000) <= 0)
             continue;
 
         if (packetType == CRTPacket::PacketEvent)
