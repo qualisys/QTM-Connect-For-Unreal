@@ -22,6 +22,9 @@ const FName markersParentName = "Markers";
  
 #pragma optimize("", off)
 
+
+const std::vector<FString> QTMConnectLiveLinkSettings::STREAMRATES({"All Frames", "Frequency", "Frequency Divisor"});;
+
 QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString& settingsString)
 {
     QTMConnectLiveLinkSettings settings;
@@ -53,6 +56,18 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     {
         settings.StreamSkeleton = streamSkeleton == "true";
     }
+    settings.StreamRate = "All Frames";
+    FString streamRate;
+    if (FParse::Value(*settingsString, TEXT("StreamRate="), streamRate))
+    {
+        settings.StreamRate = streamRate;
+    }
+    settings.FrequencyValue = 0;
+    FString frequencyValue;
+    if (FParse::Value(*settingsString, TEXT("FrequencyValue="), frequencyValue))
+    {
+        settings.FrequencyValue = FCString::Atoi(*frequencyValue);
+    }
     return settings;
 }
 
@@ -63,6 +78,8 @@ FString QTMConnectLiveLinkSettings::ToString() const
     settingsString.Append(FString::Printf(TEXT("Stream3d=\"%d\""), Stream3d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("Stream6d=\"%d\""), Stream6d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%d\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("StreamRate=\"%s\""), *StreamRate));
+    settingsString.Append(FString::Printf(TEXT("FrequencyValue=\"%d\""), FrequencyValue));
     return settingsString;
 }
 
@@ -300,7 +317,8 @@ uint32 FQTMConnectLiveLinkSource::Run()
             {
                 components |= CRTProtocol::cComponentSkeleton;
             }
-            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, 0, nullptr, components))
+            CRTProtocol::EStreamRate streamRate = (Settings.StreamRate == "Frequency") ? CRTProtocol::RateFrequency : (Settings.StreamRate == "Frequency Divisor") ? CRTProtocol::RateFrequencyDivisor : CRTProtocol::RateAllFrames;
+            if (!mRTProtocol->StreamFrames(streamRate, (streamRate != CRTProtocol::RateAllFrames) ? Settings.FrequencyValue : 0, 0, nullptr, components))
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 

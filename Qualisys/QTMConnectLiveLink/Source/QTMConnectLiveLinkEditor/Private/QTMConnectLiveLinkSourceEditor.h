@@ -12,6 +12,8 @@
 #include "Misc/Guid.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/STextComboBox.h"
+#include "Widgets/Input/SEditableText.h"
 
 DECLARE_DELEGATE_OneParam(FQTMConnectLiveLinkSourceEditorPropertiesSelected, QTMConnectLiveLinkSettings);
 
@@ -27,6 +29,10 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
 
     SQTMConnectLiveLinkSourceEditor()
     {
+        for (auto& streamrate : QTMConnectLiveLinkSettings::STREAMRATES)
+        {
+            StreamRates.Add(MakeShared<FString>(streamrate));
+        }
     };
 
     ~SQTMConnectLiveLinkSourceEditor();
@@ -58,9 +64,22 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
         return IsStreamSkeleton();
     }
 
+    FString GetStreamRate() const
+    {
+        return *StreamRatesTB->GetSelectedItem();
+    }
+
+    unsigned int GetFrequencyValue() const
+    {
+        return FCString::Atoi(*FrequencyValueTB->GetText().ToString());
+    }
 
 private:
     TSharedPtr<SEditableTextBox> IpAddress;
+    TSharedPtr<STextComboBox> StreamRatesTB;
+    TArray<TSharedPtr<FString>> StreamRates;
+    TSharedPtr<SEditableText> FrequencyValueText;
+    TSharedPtr<SEditableTextBox> FrequencyValueTB;
     TSharedPtr<SCheckBox> AutoDiscoverCB;
     TSharedPtr<SCheckBox> Stream3dCB;
     TSharedPtr<SCheckBox> Stream6dCB;
