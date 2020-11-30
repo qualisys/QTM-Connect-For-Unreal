@@ -43,13 +43,47 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
         return IsAutoConnect();
     }
 
+    bool GetStream3d() const
+    {
+        return IsStream3d();
+    }
+
+    bool GetStream6d() const
+    {
+        return IsStream6d();
+    }
+
+    bool GetStreamSkeleton() const
+    {
+        return IsStreamSkeleton();
+    }
+
+
 private:
     TSharedPtr<SEditableTextBox> IpAddress;
     TSharedPtr<SCheckBox> AutoDiscoverCB;
+    TSharedPtr<SCheckBox> Stream3dCB;
+    TSharedPtr<SCheckBox> Stream6dCB;
+    TSharedPtr<SCheckBox> StreamSkeletonCB;
 
     bool IsAutoConnect() const
     {
         return AutoDiscoverCB->IsChecked();
+    }
+
+    bool IsStream3d() const
+    {
+        return Stream3dCB->IsChecked();
+    }
+
+    bool IsStream6d() const
+    {
+        return Stream6dCB->IsChecked();
+    }
+
+    bool IsStreamSkeleton() const
+    {
+        return StreamSkeletonCB->IsChecked();
     }
 
     FReply CreateSource() const;

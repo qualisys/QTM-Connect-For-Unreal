@@ -33,8 +33,25 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     FString autoDiscover;
     if (!FParse::Value(*settingsString, TEXT("AutoDiscover="), autoDiscover))
     {
-        if (autoDiscover == "true")
-            settings.AutoDiscover = true;
+        settings.AutoDiscover = autoDiscover == "true";
+    }
+    settings.Stream3d = false;
+    FString stream3d;
+    if (!FParse::Value(*settingsString, TEXT("Stream3d="), stream3d))
+    {
+        settings.Stream3d = stream3d == "true";
+    }
+    settings.Stream6d = true;
+    FString stream6d;
+    if (!FParse::Value(*settingsString, TEXT("Stream6d="), stream6d))
+    {
+        settings.Stream6d = stream6d == "true";
+    }
+    settings.StreamSkeleton = true;
+    FString streamSkeleton;
+    if (!FParse::Value(*settingsString, TEXT("StreamSkeleton="), streamSkeleton))
+    {
+        settings.StreamSkeleton = streamSkeleton == "true";
     }
     return settings;
 }
@@ -43,6 +60,9 @@ FString QTMConnectLiveLinkSettings::ToString() const
 {
     FString settingsString = FString::Printf(TEXT("IpAddress=\"%s\""), *IpAddress);
     settingsString.Append(FString::Printf(TEXT("AutoDiscover=\"%d\""), AutoDiscover ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("Stream3d=\"%d\""), Stream3d ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("Stream6d=\"%d\""), Stream6d ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%d\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
     return settingsString;
 }
 
@@ -168,7 +188,7 @@ float CalculateTimecodeFrequency(std::shared_ptr<CRTProtocol> rtProtocol)
     CRTProtocol::EProcessingActions eRtProcessingActions;
     CRTProtocol::EProcessingActions eReprocessingActions;
 
-    rtProtocol->GetSystemSettings(frequency, captureTime, startOnTrig, trigNo, trigNc, trigSoftware, eProcessingActions, eRtProcessingActions, eReprocessingActions);
+    rtProtocol->GetGeneralSettings(frequency, captureTime, startOnTrig, trigNo, trigNc, trigSoftware, eProcessingActions, eRtProcessingActions, eReprocessingActions);
 
     bool bEnabled; CRTProtocol::ESignalSource eSignalSource;
     bool bSignalModePeriodic; unsigned int nFreqMultiplier;
@@ -212,10 +232,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     const auto discoverResponses = mRTProtocol->GetNumberOfDiscoverResponses();
                     if (discoverResponses >= 1)
                     {
-                        char message[256];
                         unsigned int addr;
                         unsigned short basePort;
-                        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message, sizeof(message)))
+                        std::string message;
+                        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message))
                         {
                             char serverAddr[40];
                             sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
@@ -243,13 +263,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
             bool any3DSettings = false;
             bool anySkeletonSettings = false;
             bool any6DOFSettings = false;
-            if (mRTProtocol->ReadCameraSystemSettings() &&
+            if (mRTProtocol->ReadGeneralSettings() &&
                 mRTProtocol->Read3DSettings(any3DSettings) &&
                 mRTProtocol->ReadSkeletonSettings(anySkeletonSettings) &&
-                mRTProtocol->Read6DOFSettings(any6DOFSettings) &&
-                any3DSettings &&
-                anySkeletonSettings &&
-                any6DOFSettings)
+                mRTProtocol->Read6DOFSettings(any6DOFSettings))
             {
                 readSettings = true;
 
@@ -270,7 +287,20 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
         if (!startedStreaming)
         {
-            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, 0, nullptr, (CRTProtocol::cComponent3d | CRTProtocol::cComponentSkeleton | CRTProtocol::cComponent6d | CRTProtocol::cComponentTimecode)))
+            auto components = CRTProtocol::cComponentTimecode;
+            if (Settings.Stream3d) 
+            {
+                components |= CRTProtocol::cComponent3d;
+            }
+            if (Settings.Stream6d)
+            {
+                components |= CRTProtocol::cComponent6d;
+            }
+            if (Settings.StreamSkeleton)
+            {
+                components |= CRTProtocol::cComponentSkeleton;
+            }
+            if (!mRTProtocol->StreamFrames(CRTProtocol::RateAllFrames, 0, 0, nullptr, components))
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 
@@ -283,8 +313,24 @@ uint32 FQTMConnectLiveLinkSource::Run()
         }
 
         CRTPacket::EPacketType packetType;
-        if (mRTProtocol->ReceiveRTPacket(packetType, false, 0) <= 0)
+        int result = mRTProtocol->ReceiveRTPacket(packetType, false, 1000);
+        if (result == 0)
+        {
             continue;
+        }
+        else if (result < 0)
+        {
+            if (startedStreaming)
+            {
+                DisconnectFromQTM();
+                autoDiscover = false;
+            }
+
+            ClearSubjects();
+            readSettings = false;
+            startedStreaming = false;
+            continue;
+        }
 
         if (packetType == CRTPacket::PacketEvent)
         {
@@ -333,32 +379,31 @@ uint32 FQTMConnectLiveLinkSource::Run()
             FQualifiedFrameTime sceneTime;
 
             // There can only be one timecode present
-            const auto timecodeCount = packet->GetTimecodeCount();
-            if (timecodeCount > 0)
+            if (packet->IsTimeCodeAvailable())
             {
                 CRTPacket::ETimecodeType timecodeType;
-                if (packet->GetTimecodeType(0, timecodeType))
+                if (packet->GetTimecodeType(timecodeType))
                 {
                     switch (timecodeType)
                     {
                     case CRTPacket::TimecodeSMPTE:
                     {
                         int hours, minutes, seconds, frame;
-                        packet->GetTimecodeSMPTE(0, hours, minutes, seconds, frame);
+                        packet->GetTimecodeSMPTE(hours, minutes, seconds, frame);
                         ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeIRIG:
                     {
                         int year, day, hours, minutes, seconds, tenths;
-                        packet->GetTimecodeIRIG(0, year, day, hours, minutes, seconds, tenths);
+                        packet->GetTimecodeIRIG(year, day, hours, minutes, seconds, tenths);
                         ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, 0, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeCamerTime:
                     {
                         unsigned __int64 cameraTime;
-                        packet->GetTimecodeCameraTime(0, cameraTime);
+                        packet->GetTimecodeCameraTime(cameraTime);
                         const auto seconds = (cameraTime / 10000000);
                         ConstructLiveLinkTimeCode(timecodeFrequency, seconds, sceneTime);
                         break;
@@ -459,32 +504,35 @@ uint32 FQTMConnectLiveLinkSource::Run()
                 // Push marker transforms
                 const auto markerCount = packet->Get3DMarkerCount();
 
-                FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
-                FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
-                TArray<FTransform>& transforms = subjectFrame.Transforms;
-                transforms.SetNumUninitialized(markerCount);
-
-                for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
+                if (markerCount > 0)
                 {
-                    float x, y, z;
-                    if (packet->Get3DMarker(markerIndex, x, y, z))
+                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
+                    FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
+                    TArray<FTransform>& transforms = subjectFrame.Transforms;
+                    transforms.SetNumUninitialized(markerCount);
+
+                    for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
                     {
-                        if (isnan(x) || isnan(y) || isnan(z))
+                        float x, y, z;
+                        if (packet->Get3DMarker(markerIndex, x, y, z))
                         {
-                            continue;
+                            if (isnan(x) || isnan(y) || isnan(z))
+                            {
+                                continue;
+                            }
+
+                            FVector position(-x, y, z);
+                            position *= positionScalingFactor;
+                            FVector scale(1.0, 1.0, 1.0);
+                            transforms[markerIndex] = FTransform(FQuat::Identity, position, scale);
                         }
-
-                        FVector position(-x, y, z);
-                        position *= positionScalingFactor;
-                        FVector scale(1.0, 1.0, 1.0);
-                        transforms[markerIndex] = FTransform(FQuat::Identity, position, scale);
                     }
+
+                    subjectFrame.WorldTime = worldTime;
+                    subjectFrame.MetaData.SceneTime = sceneTime;
+
+                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, markersParentName }, MoveTemp(frameDataStruct));
                 }
-
-                subjectFrame.WorldTime = worldTime;
-                subjectFrame.MetaData.SceneTime = sceneTime;
-
-                Client->PushSubjectFrameData_AnyThread({ SourceGuid, markersParentName }, MoveTemp(frameDataStruct));
             }
 
         }
@@ -497,6 +545,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
 {
     ClearSubjects();
 
+    if (Settings.StreamSkeleton)
     {
         // Skeleton
         const auto skeletonCount = mRTProtocol->GetSkeletonCount();
@@ -529,6 +578,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
             EncounteredSubjects.Add({ SourceGuid, skeletonName });
         }
     }
+    if (Settings.Stream6d)
     {
         // Rigid body
         const auto rigidBodyCount = mRTProtocol->Get6DOFBodyCount();
@@ -554,6 +604,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
             EncounteredSubjects.Add({ SourceGuid, name });
         }
     }
+    if (Settings.Stream3d)
     {
         const auto markerCount = mRTProtocol->Get3DLabeledMarkerCount();
 
