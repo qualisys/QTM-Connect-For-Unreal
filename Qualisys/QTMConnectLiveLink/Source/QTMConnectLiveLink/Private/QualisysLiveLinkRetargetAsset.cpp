@@ -131,6 +131,11 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
 {
     const auto& SourceBoneNames = InSkeletonData->GetBoneNames();
 
+    // Make sure we're dealing with a QTM animation skeleton
+    const auto SanityCheckIndex = SourceBoneNames.Find("Hips");
+    if (SanityCheckIndex < 0)
+        return;
+
     /* Get the target bone names */
     TArray<FName, TMemStackAllocator<>> TargetBoneNames;
     TargetBoneNames.Reserve(SourceBoneNames.Num());
@@ -179,6 +184,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
     const auto TargetRightLegLength = (RightToeBaseRefPose.GetTranslation() - HipsRefPose.GetTranslation()).Size();
     const auto TargetAvgLegLength = ((TargetLeftLegLength + TargetRightLegLength) / 2.0);
     const auto TargetLegScale = (TargetAvgLegLength / SourceAvgLegLength);
+    
 
     CompactPoseBoneIndices.Init(FCompactPoseBoneIndex(INDEX_NONE), SourceBoneNames.Num());
     LocalPoseCorrections.Init(FQuat::Identity, SourceBoneNames.Num());
@@ -223,7 +229,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
                     const auto ChildActualDir = (ChildRefPose.GetTranslation() - WorldRefPose.GetTranslation()).GetSafeNormal();
                     const auto ChildTargetDir = GetTargetBoneDir(SourceBoneNames[i]);
 
-                    LocalPoseCorrections[i] = FQuat::FindBetween(WorldToLocal.RotateVector(ChildActualDir), WorldToLocal.RotateVector(ChildTargetDir));
+                    LocalPoseCorrections[i] = FQuat::MakeFromEuler(FVector(0, 0, 0));
                 }
             }
         }
@@ -236,7 +242,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
             const auto OriginalPose = GetRefPose(OutPose, BoneIndex, false);
             const auto CorrectedPose = GetRefPose(OutPose, BoneIndex, true);
 
-            LocalPoseCorrections[i] = (CorrectedPose.GetRotation().Inverse() * OriginalPose.GetRotation());
+            LocalPoseCorrections[i] = FQuat::MakeFromEuler(FVector(0, 0, 0));
         }
 
         auto Pose = FTransform::Identity;
