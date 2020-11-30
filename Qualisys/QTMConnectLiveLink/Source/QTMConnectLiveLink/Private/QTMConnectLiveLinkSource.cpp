@@ -34,25 +34,25 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     }
     settings.AutoDiscover = false;
     FString autoDiscover;
-    if (!FParse::Value(*settingsString, TEXT("AutoDiscover="), autoDiscover))
+    if (FParse::Value(*settingsString, TEXT("AutoDiscover="), autoDiscover))
     {
         settings.AutoDiscover = autoDiscover == "true";
     }
     settings.Stream3d = false;
     FString stream3d;
-    if (!FParse::Value(*settingsString, TEXT("Stream3d="), stream3d))
+    if (FParse::Value(*settingsString, TEXT("Stream3d="), stream3d))
     {
         settings.Stream3d = stream3d == "true";
     }
     settings.Stream6d = true;
     FString stream6d;
-    if (!FParse::Value(*settingsString, TEXT("Stream6d="), stream6d))
+    if (FParse::Value(*settingsString, TEXT("Stream6d="), stream6d))
     {
         settings.Stream6d = stream6d == "true";
     }
     settings.StreamSkeleton = true;
     FString streamSkeleton;
-    if (!FParse::Value(*settingsString, TEXT("StreamSkeleton="), streamSkeleton))
+    if (FParse::Value(*settingsString, TEXT("StreamSkeleton="), streamSkeleton))
     {
         settings.StreamSkeleton = streamSkeleton == "true";
     }
@@ -74,10 +74,10 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
 FString QTMConnectLiveLinkSettings::ToString() const
 {
     FString settingsString = FString::Printf(TEXT("IpAddress=\"%s\""), *IpAddress);
-    settingsString.Append(FString::Printf(TEXT("AutoDiscover=\"%d\""), AutoDiscover ? TEXT("true") : TEXT("false")));
-    settingsString.Append(FString::Printf(TEXT("Stream3d=\"%d\""), Stream3d ? TEXT("true") : TEXT("false")));
-    settingsString.Append(FString::Printf(TEXT("Stream6d=\"%d\""), Stream6d ? TEXT("true") : TEXT("false")));
-    settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%d\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("AutoDiscover=\"%s\""), AutoDiscover ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("Stream3d=\"%s\""), Stream3d ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("Stream6d=\"%s\""), Stream6d ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%s\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamRate=\"%s\""), *StreamRate));
     settingsString.Append(FString::Printf(TEXT("FrequencyValue=\"%d\""), FrequencyValue));
     return settingsString;
