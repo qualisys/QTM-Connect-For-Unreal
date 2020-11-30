@@ -313,8 +313,24 @@ uint32 FQTMConnectLiveLinkSource::Run()
         }
 
         CRTPacket::EPacketType packetType;
-        if (mRTProtocol->ReceiveRTPacket(packetType, false, 0) <= 0)
+        int result = mRTProtocol->ReceiveRTPacket(packetType, false, 1000);
+        if (result == 0)
+        {
             continue;
+        }
+        else if (result < 0)
+        {
+            if (startedStreaming)
+            {
+                DisconnectFromQTM();
+                autoDiscover = false;
+            }
+
+            ClearSubjects();
+            readSettings = false;
+            startedStreaming = false;
+            continue;
+        }
 
         if (packetType == CRTPacket::PacketEvent)
         {
