@@ -128,6 +128,65 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                     .IsChecked(ECheckBoxState::Checked)
                 ]
             ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("StreamRate", "Stream Rate"))
+                ]
+            + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(StreamRatesTB, STextComboBox)
+                    .OptionsSource(&StreamRates)
+                    .InitiallySelectedItem(*StreamRates.begin())
+                    .OnSelectionChanged_Lambda(
+                        [&](TSharedPtr<FString> text, ESelectInfo::Type)
+                        {
+                            bool allFrames = (text == *StreamRates.begin());
+                            FrequencyValueText->SetEnabled(!allFrames);
+                            FrequencyValueTB->SetEnabled(!allFrames);
+                            FrequencyValueText->SetText(allFrames ? FText::FromString("Frequency") : FText::FromString(*text));
+                        }
+                    )
+                ]
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .Padding(3.0f)
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(FrequencyValueText, SEditableText)
+                    .Text(LOCTEXT("Frequency", "Frequency"))
+                ]
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(FrequencyValueTB, SEditableTextBox)
+                    .Text(LOCTEXT("0", "0"))
+                    .OnTextChanged_Lambda(
+                        [&](const FText& Val)
+                        {
+                            if (!Val.IsNumeric())
+                            {
+                                FrequencyValueTB->SetText(FText::FromString(Val.ToString().LeftChop(1)));//This gets rid of the last character in the text since it made it non-numeric.
+                            }
+                        }
+                    )
+                ]
+            ]
 
             + SVerticalBox::Slot()
             .AutoHeight()
@@ -139,6 +198,8 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
             ]
         ]
     ];
+    FrequencyValueText->SetEnabled(false);
+    FrequencyValueTB->SetEnabled(false);
 }
 
 FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
@@ -149,6 +210,8 @@ FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
     settings.Stream3d = this->GetStream3d();
     settings.Stream6d = this->GetStream6d();
     settings.StreamSkeleton = this->GetStreamSkeleton();
+    settings.StreamRate = this->GetStreamRate();
+    settings.FrequencyValue = this->GetFrequencyValue();
     OnPropertiesSelected.ExecuteIfBound(settings);
     return FReply::Handled();
 }
