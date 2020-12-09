@@ -467,18 +467,18 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         CRTPacket::SSkeletonSegment segment;
                         packet->GetSkeletonSegment(skeletonIndex, segmentIndex, segment);
                         
-                        auto segmentRotation = FQuat(segment.rotationX, -segment.rotationY, -segment.rotationZ, segment.rotationW) * FQuat(settings.rotationX, -settings.rotationY, -settings.rotationZ, settings.rotationW).Inverse();
+                        auto segmentRotation = FQuat(-segment.rotationX, segment.rotationY, -segment.rotationZ, segment.rotationW) * FQuat(-settings.rotationX, settings.rotationY, -settings.rotationZ, settings.rotationW).Inverse();
 
                         while (settings.parentIndex != -1)
                         {
                             mRTProtocol->GetSkeletonSegment(skeletonIndex, settings.parentIndex, &settings);
 
-                            auto ancestorRotation = FQuat(settings.rotationX, -settings.rotationY, -settings.rotationZ, settings.rotationW);
+                            auto ancestorRotation = FQuat(-settings.rotationX, settings.rotationY, -settings.rotationZ, settings.rotationW);
 
                             segmentRotation = ancestorRotation * segmentRotation * ancestorRotation.Inverse();
                         }
 
-                        const auto segmentLocation = FVector(-segment.positionX, segment.positionY, segment.positionZ) * positionScalingFactor;
+                        const auto segmentLocation = FVector(segment.positionX, -segment.positionY, segment.positionZ) * positionScalingFactor;
 
                         const auto segmentScale = FVector(1.0, 1.0, 1.0);
 
