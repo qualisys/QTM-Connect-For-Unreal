@@ -131,6 +131,11 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
 {
     const auto& SourceBoneNames = InSkeletonData->GetBoneNames();
 
+    // Make sure we're dealing with a QTM animation skeleton
+    const auto SanityCheckIndex = SourceBoneNames.Find("Hips");
+    if (SanityCheckIndex < 0)
+        return;
+
     /* Get the target bone names */
     TArray<FName, TMemStackAllocator<>> TargetBoneNames;
     TargetBoneNames.Reserve(SourceBoneNames.Num());
@@ -179,6 +184,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
     const auto TargetRightLegLength = (RightToeBaseRefPose.GetTranslation() - HipsRefPose.GetTranslation()).Size();
     const auto TargetAvgLegLength = ((TargetLeftLegLength + TargetRightLegLength) / 2.0);
     const auto TargetLegScale = (TargetAvgLegLength / SourceAvgLegLength);
+    
 
     CompactPoseBoneIndices.Init(FCompactPoseBoneIndex(INDEX_NONE), SourceBoneNames.Num());
     LocalPoseCorrections.Init(FQuat::Identity, SourceBoneNames.Num());
@@ -186,7 +192,11 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
     for (int32 i = 0; i < TargetBoneNames.Num(); ++i)
     {
         const auto& BoneName = TargetBoneNames[i];
-        const auto& BoneTransform = InFrameData->Transforms[i];
+        auto BoneTransform = InFrameData->Transforms[i];
+        const auto& location = BoneTransform.GetLocation();
+        const auto& rotation = BoneTransform.GetRotation();
+        BoneTransform.SetLocation(FVector(-location.X, -location.Y, location.Z));
+        BoneTransform.SetRotation(FQuat(-rotation.X, -rotation.Y, rotation.Z, rotation.W));
 
         const auto BoneIndex = GetCompactPoseBoneIndex(BoneName, OutPose);
 

@@ -11,6 +11,7 @@
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include <memory>
+#include <vector>
 
 class ILiveLinkClient;
 class CRTProtocol;
@@ -18,7 +19,7 @@ class CRTProtocol;
 class QTMCONNECTLIVELINK_API QTMConnectLiveLinkSettings
 {
 public:
-	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false)
+	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false), Stream3d(false), Stream6d(true), StreamSkeleton(true), StreamRate("All Frames"), FrequencyValue(0)
 	{
 	}
 
@@ -27,6 +28,12 @@ public:
 
     FString IpAddress;
 	bool AutoDiscover;
+	bool Stream3d;
+	bool Stream6d;
+	bool StreamSkeleton;
+    FString StreamRate;
+    unsigned int FrequencyValue;
+    static const std::vector<FString> STREAMRATES;
 };
 
 class QTMCONNECTLIVELINK_API FQTMConnectLiveLinkSource : public ILiveLinkSource, public FRunnable

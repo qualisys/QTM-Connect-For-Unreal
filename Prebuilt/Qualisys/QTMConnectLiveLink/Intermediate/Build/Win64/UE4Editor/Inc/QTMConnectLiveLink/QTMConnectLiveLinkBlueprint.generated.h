@@ -21,10 +21,15 @@ struct FLiveLinkSourceHandle;
 	{ \
 		P_GET_PROPERTY(UStrProperty,Z_Param_IpAddress); \
 		P_GET_UBOOL(Z_Param_AutoDiscover); \
+		P_GET_UBOOL(Z_Param_Stream3d); \
+		P_GET_UBOOL(Z_Param_Stream6d); \
+		P_GET_UBOOL(Z_Param_StreamSkeleton); \
+		P_GET_PROPERTY(UStrProperty,Z_Param_StreamRate); \
+		P_GET_PROPERTY(UIntProperty,Z_Param_FrequencyValue); \
 		P_GET_STRUCT_REF(FLiveLinkSourceHandle,Z_Param_Out_SourceHandle); \
 		P_FINISH; \
 		P_NATIVE_BEGIN; \
-		UQTMConnectLiveLinkBlueprint::CreateQTMConnectLiveLinkSource(Z_Param_IpAddress,Z_Param_AutoDiscover,Z_Param_Out_SourceHandle); \
+		UQTMConnectLiveLinkBlueprint::CreateQTMConnectLiveLinkSource(Z_Param_IpAddress,Z_Param_AutoDiscover,Z_Param_Stream3d,Z_Param_Stream6d,Z_Param_StreamSkeleton,Z_Param_StreamRate,Z_Param_FrequencyValue,Z_Param_Out_SourceHandle); \
 		P_NATIVE_END; \
 	}
 
@@ -35,10 +40,15 @@ struct FLiveLinkSourceHandle;
 	{ \
 		P_GET_PROPERTY(UStrProperty,Z_Param_IpAddress); \
 		P_GET_UBOOL(Z_Param_AutoDiscover); \
+		P_GET_UBOOL(Z_Param_Stream3d); \
+		P_GET_UBOOL(Z_Param_Stream6d); \
+		P_GET_UBOOL(Z_Param_StreamSkeleton); \
+		P_GET_PROPERTY(UStrProperty,Z_Param_StreamRate); \
+		P_GET_PROPERTY(UIntProperty,Z_Param_FrequencyValue); \
 		P_GET_STRUCT_REF(FLiveLinkSourceHandle,Z_Param_Out_SourceHandle); \
 		P_FINISH; \
 		P_NATIVE_BEGIN; \
-		UQTMConnectLiveLinkBlueprint::CreateQTMConnectLiveLinkSource(Z_Param_IpAddress,Z_Param_AutoDiscover,Z_Param_Out_SourceHandle); \
+		UQTMConnectLiveLinkBlueprint::CreateQTMConnectLiveLinkSource(Z_Param_IpAddress,Z_Param_AutoDiscover,Z_Param_Stream3d,Z_Param_Stream6d,Z_Param_StreamSkeleton,Z_Param_StreamRate,Z_Param_FrequencyValue,Z_Param_Out_SourceHandle); \
 		P_NATIVE_END; \
 	}
 
