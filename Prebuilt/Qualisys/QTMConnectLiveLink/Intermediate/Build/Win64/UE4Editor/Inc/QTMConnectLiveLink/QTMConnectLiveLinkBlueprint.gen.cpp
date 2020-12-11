@@ -23,10 +23,15 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 	{
 		P_GET_PROPERTY(FStrProperty,Z_Param_IpAddress);
 		P_GET_UBOOL(Z_Param_AutoDiscover);
+		P_GET_UBOOL(Z_Param_Stream3d);
+		P_GET_UBOOL(Z_Param_Stream6d);
+		P_GET_UBOOL(Z_Param_StreamSkeleton);
+		P_GET_PROPERTY(FStrProperty,Z_Param_StreamRate);
+		P_GET_PROPERTY(FIntProperty,Z_Param_FrequencyValue);
 		P_GET_STRUCT_REF(FLiveLinkSourceHandle,Z_Param_Out_SourceHandle);
 		P_FINISH;
 		P_NATIVE_BEGIN;
-		UQTMConnectLiveLinkBlueprint::CreateQTMConnectLiveLinkSource(Z_Param_IpAddress,Z_Param_AutoDiscover,Z_Param_Out_SourceHandle);
+		UQTMConnectLiveLinkBlueprint::CreateQTMConnectLiveLinkSource(Z_Param_IpAddress,Z_Param_AutoDiscover,Z_Param_Stream3d,Z_Param_Stream6d,Z_Param_StreamSkeleton,Z_Param_StreamRate,Z_Param_FrequencyValue,Z_Param_Out_SourceHandle);
 		P_NATIVE_END;
 	}
 	void UQTMConnectLiveLinkBlueprint::StaticRegisterNativesUQTMConnectLiveLinkBlueprint()
@@ -43,9 +48,22 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 		{
 			FString IpAddress;
 			bool AutoDiscover;
+			bool Stream3d;
+			bool Stream6d;
+			bool StreamSkeleton;
+			FString StreamRate;
+			int32 FrequencyValue;
 			FLiveLinkSourceHandle SourceHandle;
 		};
 		static const UE4CodeGen_Private::FStructPropertyParams NewProp_SourceHandle;
+		static const UE4CodeGen_Private::FUnsizedIntPropertyParams NewProp_FrequencyValue;
+		static const UE4CodeGen_Private::FStrPropertyParams NewProp_StreamRate;
+		static void NewProp_StreamSkeleton_SetBit(void* Obj);
+		static const UE4CodeGen_Private::FBoolPropertyParams NewProp_StreamSkeleton;
+		static void NewProp_Stream6d_SetBit(void* Obj);
+		static const UE4CodeGen_Private::FBoolPropertyParams NewProp_Stream6d;
+		static void NewProp_Stream3d_SetBit(void* Obj);
+		static const UE4CodeGen_Private::FBoolPropertyParams NewProp_Stream3d;
 		static void NewProp_AutoDiscover_SetBit(void* Obj);
 		static const UE4CodeGen_Private::FBoolPropertyParams NewProp_AutoDiscover;
 		static const UE4CodeGen_Private::FStrPropertyParams NewProp_IpAddress;
@@ -56,6 +74,23 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 		static const UE4CodeGen_Private::FFunctionParams FuncParams;
 	};
 	const UE4CodeGen_Private::FStructPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_SourceHandle = { "SourceHandle", nullptr, (EPropertyFlags)0x0010000000000180, UE4CodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms, SourceHandle), Z_Construct_UScriptStruct_FLiveLinkSourceHandle, METADATA_PARAMS(nullptr, 0) };
+	const UE4CodeGen_Private::FUnsizedIntPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_FrequencyValue = { "FrequencyValue", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms, FrequencyValue), METADATA_PARAMS(nullptr, 0) };
+	const UE4CodeGen_Private::FStrPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_StreamRate = { "StreamRate", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms, StreamRate), METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_StreamSkeleton_SetBit(void* Obj)
+	{
+		((QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms*)Obj)->StreamSkeleton = 1;
+	}
+	const UE4CodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_StreamSkeleton = { "StreamSkeleton", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Bool | UE4CodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms), &Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_StreamSkeleton_SetBit, METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream6d_SetBit(void* Obj)
+	{
+		((QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms*)Obj)->Stream6d = 1;
+	}
+	const UE4CodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream6d = { "Stream6d", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Bool | UE4CodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms), &Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream6d_SetBit, METADATA_PARAMS(nullptr, 0) };
+	void Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream3d_SetBit(void* Obj)
+	{
+		((QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms*)Obj)->Stream3d = 1;
+	}
+	const UE4CodeGen_Private::FBoolPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream3d = { "Stream3d", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Bool | UE4CodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, 1, sizeof(bool), sizeof(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms), &Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream3d_SetBit, METADATA_PARAMS(nullptr, 0) };
 	void Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_AutoDiscover_SetBit(void* Obj)
 	{
 		((QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms*)Obj)->AutoDiscover = 1;
@@ -64,6 +99,11 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 	const UE4CodeGen_Private::FStrPropertyParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_IpAddress = { "IpAddress", nullptr, (EPropertyFlags)0x0010000000000080, UE4CodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, 1, STRUCT_OFFSET(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms, IpAddress), METADATA_PARAMS(nullptr, 0) };
 	const UE4CodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::PropPointers[] = {
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_SourceHandle,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_FrequencyValue,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_StreamRate,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_StreamSkeleton,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream6d,
+		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_Stream3d,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_AutoDiscover,
 		(const UE4CodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::NewProp_IpAddress,
 	};
@@ -72,8 +112,13 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 		{ "AutoDiscover", "true" },
 		{ "Category", "Qualisys" },
 		{ "DisplayName", "Create QTM Connect LiveLink Source" },
+		{ "FrequencyValue", "0" },
 		{ "IpAddress", "127.0.0.1" },
 		{ "ModuleRelativePath", "Public/QTMConnectLiveLinkBlueprint.h" },
+		{ "Stream3d", "false" },
+		{ "Stream6d", "true" },
+		{ "StreamRate", "All Frames" },
+		{ "StreamSkeleton", "true" },
 	};
 #endif
 	const UE4CodeGen_Private::FFunctionParams Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_UQTMConnectLiveLinkBlueprint, nullptr, "CreateQTMConnectLiveLinkSource", nullptr, nullptr, sizeof(QTMConnectLiveLinkBlueprint_eventCreateQTMConnectLiveLinkSource_Parms), Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x04442401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource_Statics::Function_MetaDataParams)) };
@@ -105,7 +150,7 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 		(UObject* (*)())Z_Construct_UPackage__Script_QTMConnectLiveLink,
 	};
 	const FClassFunctionLinkInfo Z_Construct_UClass_UQTMConnectLiveLinkBlueprint_Statics::FuncInfo[] = {
-		{ &Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource, "CreateQTMConnectLiveLinkSource" }, // 1569796353
+		{ &Z_Construct_UFunction_UQTMConnectLiveLinkBlueprint_CreateQTMConnectLiveLinkSource, "CreateQTMConnectLiveLinkSource" }, // 376085696
 	};
 #if WITH_METADATA
 	const UE4CodeGen_Private::FMetaDataPairParam Z_Construct_UClass_UQTMConnectLiveLinkBlueprint_Statics::Class_MetaDataParams[] = {
@@ -140,7 +185,7 @@ void EmptyLinkFunctionForGeneratedCodeQTMConnectLiveLinkBlueprint() {}
 		}
 		return OuterClass;
 	}
-	IMPLEMENT_CLASS(UQTMConnectLiveLinkBlueprint, 2169812921);
+	IMPLEMENT_CLASS(UQTMConnectLiveLinkBlueprint, 897306789);
 	template<> QTMCONNECTLIVELINK_API UClass* StaticClass<UQTMConnectLiveLinkBlueprint>()
 	{
 		return UQTMConnectLiveLinkBlueprint::StaticClass();
