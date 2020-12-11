@@ -1,0 +1,40 @@
+{
+	"FileVersion": 3,
+	"Version": 0,
+	"VersionName": "",
+	"FriendlyName": "QTMConnectLiveLink",
+	"Description": "LiveLink Source for receiving Qualisys Track Manager skeleton data",
+	"Category": "Qualisys",
+	"CreatedBy": "Qualisys",
+	"CreatedByURL": "https://www.qualisys.com/",
+	"DocsURL": "https://www.qualisys.com/software/real-time-sdk/",
+	"MarketplaceURL": "https://github.com/qualisys/Qualisys-Unreal-Plugin",
+	"SupportURL": "https://www.qualisys.com/support/",
+	"EngineVersion": "4.26.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "QTMConnectLiveLink",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "QTMConnectLiveLinkEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "LiveLink",
+			"Enabled": true
+		}
+	]
+}
