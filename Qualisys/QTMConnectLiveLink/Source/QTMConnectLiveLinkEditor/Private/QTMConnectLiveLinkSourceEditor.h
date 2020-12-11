@@ -12,6 +12,8 @@
 #include "Misc/Guid.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/STextComboBox.h"
+#include "Widgets/Input/SEditableText.h"
 
 DECLARE_DELEGATE_OneParam(FQTMConnectLiveLinkSourceEditorPropertiesSelected, QTMConnectLiveLinkSettings);
 
@@ -27,6 +29,10 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
 
     SQTMConnectLiveLinkSourceEditor()
     {
+        for (auto& streamrate : QTMConnectLiveLinkSettings::STREAMRATES)
+        {
+            StreamRates.Add(MakeShared<FString>(streamrate));
+        }
     };
 
     ~SQTMConnectLiveLinkSourceEditor();
@@ -43,13 +49,60 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
         return IsAutoConnect();
     }
 
+    bool GetStream3d() const
+    {
+        return IsStream3d();
+    }
+
+    bool GetStream6d() const
+    {
+        return IsStream6d();
+    }
+
+    bool GetStreamSkeleton() const
+    {
+        return IsStreamSkeleton();
+    }
+
+    FString GetStreamRate() const
+    {
+        return *StreamRatesTB->GetSelectedItem();
+    }
+
+    unsigned int GetFrequencyValue() const
+    {
+        return FCString::Atoi(*FrequencyValueTB->GetText().ToString());
+    }
+
 private:
     TSharedPtr<SEditableTextBox> IpAddress;
+    TSharedPtr<STextComboBox> StreamRatesTB;
+    TArray<TSharedPtr<FString>> StreamRates;
+    TSharedPtr<SEditableText> FrequencyValueText;
+    TSharedPtr<SEditableTextBox> FrequencyValueTB;
     TSharedPtr<SCheckBox> AutoDiscoverCB;
+    TSharedPtr<SCheckBox> Stream3dCB;
+    TSharedPtr<SCheckBox> Stream6dCB;
+    TSharedPtr<SCheckBox> StreamSkeletonCB;
 
     bool IsAutoConnect() const
     {
         return AutoDiscoverCB->IsChecked();
+    }
+
+    bool IsStream3d() const
+    {
+        return Stream3dCB->IsChecked();
+    }
+
+    bool IsStream6d() const
+    {
+        return Stream6dCB->IsChecked();
+    }
+
+    bool IsStreamSkeleton() const
+    {
+        return StreamSkeletonCB->IsChecked();
     }
 
     FReply CreateSource() const;
