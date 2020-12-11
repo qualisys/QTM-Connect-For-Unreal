@@ -192,7 +192,11 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
     for (int32 i = 0; i < TargetBoneNames.Num(); ++i)
     {
         const auto& BoneName = TargetBoneNames[i];
-        const auto& BoneTransform = InFrameData->Transforms[i];
+        auto BoneTransform = InFrameData->Transforms[i];
+        const auto& location = BoneTransform.GetLocation();
+        const auto& rotation = BoneTransform.GetRotation();
+        BoneTransform.SetLocation(FVector(-location.X, -location.Y, location.Z));
+        BoneTransform.SetRotation(FQuat(-rotation.X, -rotation.Y, rotation.Z, rotation.W));
 
         const auto BoneIndex = GetCompactPoseBoneIndex(BoneName, OutPose);
 
@@ -229,7 +233,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
                     const auto ChildActualDir = (ChildRefPose.GetTranslation() - WorldRefPose.GetTranslation()).GetSafeNormal();
                     const auto ChildTargetDir = GetTargetBoneDir(SourceBoneNames[i]);
 
-                    LocalPoseCorrections[i] = FQuat::MakeFromEuler(FVector(0, 0, 0));
+                    LocalPoseCorrections[i] = FQuat::FindBetween(WorldToLocal.RotateVector(ChildActualDir), WorldToLocal.RotateVector(ChildTargetDir));
                 }
             }
         }
@@ -242,7 +246,7 @@ void UQualisysLiveLinkRetargetAsset::BuildPoseFromAnimationData(float DeltaTime,
             const auto OriginalPose = GetRefPose(OutPose, BoneIndex, false);
             const auto CorrectedPose = GetRefPose(OutPose, BoneIndex, true);
 
-            LocalPoseCorrections[i] = FQuat::MakeFromEuler(FVector(0, 0, 0));
+            LocalPoseCorrections[i] = (CorrectedPose.GetRotation().Inverse() * OriginalPose.GetRotation());
         }
 
         auto Pose = FTransform::Identity;
