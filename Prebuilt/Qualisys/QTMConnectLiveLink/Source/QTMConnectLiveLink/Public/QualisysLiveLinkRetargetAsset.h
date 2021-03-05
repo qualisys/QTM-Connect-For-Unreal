@@ -24,9 +24,11 @@ public:
     bool DebugTPose;
 
 private:
-    TArray<FQuat> LocalPoseCorrections;
+    TArray<FQuat> TargetLocalPoseCorrections;
     TArray<FCompactPoseBoneIndex> CompactPoseBoneIndices;
 
     int32 GetSourceBoneIndex(const FCompactPoseBoneIndex& Index);
-    FTransform GetRefPose(const FCompactPose& Pose, const FCompactPoseBoneIndex& Index, bool UsePoseCorrection);
+
+    FTransform GetWorldPose(const FCompactPose& Pose, const FCompactPoseBoneIndex& Index, bool UsePoseCorrection);
+    FTransform GetWorldReferencePose(const FCompactPose& Pose, const FCompactPoseBoneIndex& Index, bool UsePoseCorrection);
 };
