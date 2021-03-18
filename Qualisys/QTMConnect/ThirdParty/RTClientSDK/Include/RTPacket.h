@@ -14,7 +14,7 @@
 #endif
 
 #define MAJOR_VERSION           1
-#define MINOR_VERSION           20
+#define MINOR_VERSION           21
 
 class DLL_EXPORT CRTPacket
 {

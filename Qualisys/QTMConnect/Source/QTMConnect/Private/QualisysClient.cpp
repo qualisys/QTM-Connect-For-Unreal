@@ -223,8 +223,16 @@ void AQualisysClient::TickActor(float DeltaTime, enum ELevelTick TickType, FActo
 
     CRTPacket::EPacketType packetType;
     auto ret = mRtProtocol->ReceiveRTPacket(packetType, false, 0);
-    if (ret <= 0)
+    if (ret == 0)
+    {
         return;
+    }
+    else if(ret < 0)
+    {
+        GLog->Logf(TEXT("AQualisysClient::TickActor: ReceiveRTPacket failed"));
+        ShutdownQualisysClient();
+        return;
+    }
 
     auto rtPacket = mRtProtocol->GetRTPacket();
     if (packetType == CRTPacket::PacketEvent)
