@@ -176,12 +176,12 @@ float QtmToUEScalingFactor()
 }
 
 
-void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, FQualifiedFrameTime& timeCode)
+void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, float subframe, FQualifiedFrameTime& timeCode)
 {
     timeCode.Rate = FFrameRate(rate, 1);
     FTimecode UnrealTimecode(hours, minutes, seconds, frames, false);
 
-    timeCode.Time = FFrameTime(UnrealTimecode.ToFrameNumber(timeCode.Rate));
+    timeCode.Time = FFrameTime(UnrealTimecode.ToFrameNumber(timeCode.Rate), subframe);
 }
 
 void ConstructLiveLinkTimeCode(int rate, int seconds, FQualifiedFrameTime& timeCode)
@@ -418,14 +418,16 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     {
                         int hours, minutes, seconds, frame;
                         packet->GetTimecodeSMPTE(hours, minutes, seconds, frame);
-                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
+                        // TODO Get subframe 
+                        float subframe = 0.0f;
+                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, subframe, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeIRIG:
                     {
                         int year, day, hours, minutes, seconds, tenths;
                         packet->GetTimecodeIRIG(year, day, hours, minutes, seconds, tenths);
-                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, 0, sceneTime);
+                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, 0, 0, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeCamerTime:
