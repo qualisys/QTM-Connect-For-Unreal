@@ -29,7 +29,7 @@ public class QTMConnectLiveLink : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         
-        string rtClientSDKPath = Path.GetFullPath(Path.Combine(PluginDirectory, "ThirdParty/RTClientSDK"));
+        string rtClientSDKPath = Path.GetFullPath(Path.Combine(PluginDirectory, "Source/ThirdParty/RTClientSDK"));
         string rtClientSDKIncludePath = System.IO.Path.Combine(rtClientSDKPath, "Include");
         string targetPlatformPathName = GetTargetPlatformPathName(Target);
         string rtClientSDKLibPath = Path.Combine(rtClientSDKPath, "Lib", targetPlatformPathName);

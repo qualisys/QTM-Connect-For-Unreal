@@ -33,7 +33,7 @@ public class QTMConnect : ModuleRules
         PrivatePCHHeaderFile = "Public/QTMConnect.h";
         //PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        string rtClientSDKPath = Path.Combine(PluginDirectory, "ThirdParty/RTClientSDK");
+        string rtClientSDKPath = Path.Combine(PluginDirectory, "Source/ThirdParty/RTClientSDK");
         string rtClientSDKIncludePath = Path.Combine(rtClientSDKPath, "Include");
         string targetPlatformPathName = GetTargetPlatformPathName(Target);
         string rtClientSDKLibPath = Path.Combine(rtClientSDKPath, "Lib", targetPlatformPathName);
