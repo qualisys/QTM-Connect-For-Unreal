@@ -1,0 +1,17 @@
+# DevOps Pipeline definition
+# Internal use only
+
+trigger:
+- main
+
+pool: TestPool
+
+resources:
+  repositories:
+    - repository: devops
+      type: git
+      name: BuildTest
+
+steps:
+- checkout: devops
+- template: internal-pipeline.yml@devops
