@@ -5,13 +5,34 @@ using UnrealBuildTool;
 
 public class QTMConnectLiveLinkEditor : ModuleRules
 {
+    
+    string GetTargetPlatformPathName(ReadOnlyTargetRules Target)
+    {
+#if UE_5_0_OR_LATER
+        return "Win64";
+#else
+        return Target.Platform == UnrealTargetPlatform.Win32 ? "Win32" : "Win64";
+#endif
+    }
+
+    bool IsWindowsPlatform(ReadOnlyTargetRules Target)
+    {
+        bool bWindows =
+#if !UE_5_0_OR_LATER
+        Target.Platform == UnrealTargetPlatform.Win32 ||
+#endif
+        Target.Platform == UnrealTargetPlatform.Win64;
+
+        return bWindows;
+    }
+    
     public QTMConnectLiveLinkEditor(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        string rtClientSDKPath = Path.GetFullPath(Path.Combine(PluginDirectory, "ThirdParty/RTClientSDK"));
+        string rtClientSDKPath = Path.GetFullPath(Path.Combine(PluginDirectory, "Source/ThirdParty/RTClientSDK"));
         string rtClientSDKIncludePath = System.IO.Path.Combine(rtClientSDKPath, "Include");
-        string targetPlatformPathName = (Target.Platform == UnrealTargetPlatform.Win32) ? "Win32" : "Win64";
+        string targetPlatformPathName = GetTargetPlatformPathName(Target);
         string rtClientSDKLibPath = Path.Combine(rtClientSDKPath, "Lib", targetPlatformPathName);
 
         PrivateIncludePaths.AddRange(
@@ -56,11 +77,9 @@ public class QTMConnectLiveLinkEditor : ModuleRules
 
         PublicSystemIncludePaths.Add(rtClientSDKIncludePath);
 
-        if (Target.Platform == UnrealTargetPlatform.Win32 ||
-        Target.Platform == UnrealTargetPlatform.Win64)
+        if (IsWindowsPlatform(Target))
         {
-            PublicLibraryPaths.Add(rtClientSDKLibPath);
-            PublicAdditionalLibraries.Add("RTClientSDK.lib");
+            PublicAdditionalLibraries.Add(Path.Combine(rtClientSDKLibPath,"RTClientSDK.lib"));
         }
     }
 }
