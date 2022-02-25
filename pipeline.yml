@@ -7,7 +7,7 @@ resources:
       type: git
       name: plugins-unreal-publishing
 variables: 
-  - template: variables.yml@devops
+- template: variables.yml@devops
 steps:
 - checkout: devops
 - template: azure-pipelines.yml@devops
