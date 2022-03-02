@@ -10,7 +10,7 @@ variables:
 - template: variables.yml@devops
 jobs:
 - job: Build
-  timeoutInMinutes: 0
+  timeoutInMinutes: 180
   steps:
   - checkout: devops
   - template: azure-pipelines.yml@devops
