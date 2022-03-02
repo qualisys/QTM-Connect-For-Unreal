@@ -1,12 +1,16 @@
-trigger:
+trigger: 
 - main
-pool:
-  vmImage: windows-2019
+pool: Unreal
 resources:
   repositories:
     - repository: devops
       type: git
       name: plugins-unreal-publishing
-steps:
-- checkout: devops
-- template: azure-pipelines.yml@devops
+variables: 
+- template: variables.yml@devops
+jobs:
+- job: Build
+  timeoutInMinutes: 180
+  steps:
+  - checkout: devops
+  - template: azure-pipelines.yml@devops
