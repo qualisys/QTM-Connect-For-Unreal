@@ -4,6 +4,8 @@
 #include "ILiveLinkClient.h"
 #include "LiveLinkTypes.h"
 #include "Roles/LiveLinkAnimationRole.h"
+#include "Roles/LiveLinkTransformRole.h"
+#include "Roles/LiveLinkTransformTypes.h"
 
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
@@ -496,10 +498,8 @@ uint32 FQTMConnectLiveLinkSource::Run()
                 const auto rigidBodyCount = packet->Get6DOFBodyCount();
                 for (unsigned int rigidBodyIndex = 0; rigidBodyIndex < rigidBodyCount; rigidBodyIndex++)
                 {
-                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
-                    FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
-                    TArray<FTransform>& transforms = subjectFrame.Transforms;
-                    transforms.SetNumUninitialized(1);
+                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkTransformFrameData::StaticStruct());
+                    FLiveLinkTransformFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkTransformFrameData>();
 
                     float x, y, z;
                     float R[9];
@@ -514,7 +514,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         FVector position(-x, y, z);
                         position *= positionScalingFactor;
                         FVector scale(1.0, 1.0, 1.0);
-                        transforms[0] = FTransform(FQuat(rotation.X, -rotation.Y, -rotation.Z, rotation.W), position, scale);
+                        subjectFrame.Transform = FTransform(FQuat(rotation.X, -rotation.Y, -rotation.Z, rotation.W), position, scale);
 
                         subjectFrame.WorldTime = worldTime;
                         subjectFrame.MetaData.SceneTime = sceneTime;
@@ -612,20 +612,8 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
         {
             const FName name = mRTProtocol->Get6DOFBodyName(rigidBodyIndex);
 
-            TArray<FName> boneNames;
-            boneNames.SetNumUninitialized(1);
-            TArray<int32> boneParents;
-            boneParents.SetNumUninitialized(1);
-
-            boneNames[0] = "Bone";
-            boneParents[0] = -1;
-
-
-            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkSkeletonStaticData::StaticStruct());
-            FLiveLinkSkeletonStaticData& subjectRefSkeleton = *subjectDataStruct.Cast<FLiveLinkSkeletonStaticData>();
-            subjectRefSkeleton.SetBoneNames(boneNames);
-            subjectRefSkeleton.SetBoneParents(boneParents);
-            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkAnimationRole::StaticClass(), MoveTemp(subjectDataStruct));
+            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
+            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
 
             EncounteredSubjects.Add({ SourceGuid, name });
         }
