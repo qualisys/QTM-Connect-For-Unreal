@@ -8,6 +8,9 @@ resources:
       name: plugins-unreal-publishing
 variables: 
 - template: variables.yml@devops
-steps:
-- checkout: devops
-- template: azure-pipelines.yml@devops
+jobs:
+- job: Build
+  timeoutInMinutes: 0
+  steps:
+  - checkout: devops
+  - template: azure-pipelines.yml@devops
