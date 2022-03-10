@@ -532,13 +532,11 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                 if (markerCount > 0)
                 {
-                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
-                    FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
-                    TArray<FTransform>& transforms = subjectFrame.Transforms;
-                    transforms.SetNumUninitialized(markerCount);
-
                     for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
                     {
+                        FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkTransformFrameData::StaticStruct());
+                        FLiveLinkTransformFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkTransformFrameData>();
+
                         float x, y, z;
                         if (packet->Get3DMarker(markerIndex, x, y, z))
                         {
@@ -550,14 +548,16 @@ uint32 FQTMConnectLiveLinkSource::Run()
                             FVector position(-x, y, z);
                             position *= positionScalingFactor;
                             FVector scale(1.0, 1.0, 1.0);
-                            transforms[markerIndex] = FTransform(FQuat::Identity, position, scale);
+                            subjectFrame.Transform = FTransform(FQuat::Identity, position, scale);
+
+                            subjectFrame.WorldTime = worldTime;
+                            subjectFrame.MetaData.SceneTime = sceneTime;
+                            
+                            const FName name = mRTProtocol->Get3DLabelName(markerIndex);
+
+                            Client->PushSubjectFrameData_AnyThread({ SourceGuid, name }, MoveTemp(frameDataStruct));
                         }
                     }
-
-                    subjectFrame.WorldTime = worldTime;
-                    subjectFrame.MetaData.SceneTime = sceneTime;
-
-                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, markersParentName }, MoveTemp(frameDataStruct));
                 }
             }
 
@@ -622,25 +622,15 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
     {
         const auto markerCount = mRTProtocol->Get3DLabeledMarkerCount();
 
-        TArray<FName> markerNames;
-        markerNames.SetNumUninitialized(markerCount);
-        TArray<int32> markerParents;
-        markerParents.SetNumUninitialized(markerCount);
-
         for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
         {
-            markerNames[markerIndex] = mRTProtocol->Get3DLabelName(markerIndex);
-            markerParents[markerIndex] = -1;
+            const FName name = mRTProtocol->Get3DLabelName(markerIndex);
+
+            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
+            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
+
+            EncounteredSubjects.Add({ SourceGuid, name });
         }
-
-        FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkSkeletonStaticData::StaticStruct());
-        FLiveLinkSkeletonStaticData& subjectRefSkeleton = *subjectDataStruct.Cast<FLiveLinkSkeletonStaticData>();
-        subjectRefSkeleton.SetBoneNames(markerNames);
-        subjectRefSkeleton.SetBoneParents(markerParents);
-
-        Client->PushSubjectStaticData_AnyThread({ SourceGuid, markersParentName }, ULiveLinkAnimationRole::StaticClass(), MoveTemp(subjectDataStruct));
-
-        EncounteredSubjects.Add({ SourceGuid, markersParentName });
     }
 }
 
