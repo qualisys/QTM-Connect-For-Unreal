@@ -511,10 +511,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         }
 
                         FQuat rotation(FRotationMatrix::MakeFromXY(FVector(R[0], R[1], R[2]), FVector(R[3], R[4], R[5])));
-                        FVector position(-x, y, z);
+                        FVector position(x, -y, z);
                         position *= positionScalingFactor;
                         FVector scale(1.0, 1.0, 1.0);
-                        subjectFrame.Transform = FTransform(FQuat(rotation.X, -rotation.Y, -rotation.Z, rotation.W), position, scale);
+                        subjectFrame.Transform = FTransform(FQuat(-rotation.X, rotation.Y, -rotation.Z, rotation.W), position, scale);
 
                         subjectFrame.WorldTime = worldTime;
                         subjectFrame.MetaData.SceneTime = sceneTime;
@@ -545,7 +545,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
                                 continue;
                             }
 
-                            FVector position(-x, y, z);
+                            FVector position(x, -y, z);
                             position *= positionScalingFactor;
                             FVector scale(1.0, 1.0, 1.0);
                             subjectFrame.Transform = FTransform(FQuat::Identity, position, scale);
