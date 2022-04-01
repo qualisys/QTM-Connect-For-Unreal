@@ -58,7 +58,10 @@ public class QTMConnectLiveLink : ModuleRules
                 "Networking",
                 "Sockets",
                 "LiveLinkInterface",
-                "LiveLink"
+                "LiveLink",
+#if UE_5_0_OR_LATER
+                "LiveLinkAnimationCore",
+#endif
             }
         );
 
@@ -72,7 +75,10 @@ public class QTMConnectLiveLink : ModuleRules
                 "SlateCore",
                 "LiveLink",
                 "LiveLinkInterface",
-                "TimeManagement"
+                "TimeManagement",
+#if UE_5_0_OR_LATER
+                "LiveLinkAnimationCore",
+#endif
             }
         );
 
