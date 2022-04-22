@@ -58,6 +58,12 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     {
         settings.StreamSkeleton = streamSkeleton == "true";
     }
+    settings.StreamForce = false;
+    FString streamForce;
+    if (FParse::Value(*settingsString, TEXT("StreamForce="), streamForce))
+    {
+        settings.StreamForce = streamForce == "true";
+    }
     settings.StreamRate = "All Frames";
     FString streamRate;
     if (FParse::Value(*settingsString, TEXT("StreamRate="), streamRate))
@@ -80,6 +86,7 @@ FString QTMConnectLiveLinkSettings::ToString() const
     settingsString.Append(FString::Printf(TEXT("Stream3d=\"%s\""), Stream3d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("Stream6d=\"%s\""), Stream6d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%s\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("StreamForce=\"%s\""), StreamForce ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamRate=\"%s\""), *StreamRate));
     settingsString.Append(FString::Printf(TEXT("FrequencyValue=\"%d\""), FrequencyValue));
     return settingsString;
@@ -318,6 +325,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
             if (Settings.StreamSkeleton)
             {
                 components |= CRTProtocol::cComponentSkeleton;
+            }
+            if (Settings.StreamForce)
+            {
+                components |= CRTProtocol::cComponentForce;
             }
             
             CRTProtocol::EStreamRate streamRate = CRTProtocol::RateAllFrames;
@@ -561,6 +572,38 @@ uint32 FQTMConnectLiveLinkSource::Run()
                 }
             }
 
+            {
+                const auto forcePlateCount = packet->GetForcePlateCount();
+
+                if (forcePlateCount > 0)
+                {
+                    CRTPacket::SForce sForce;
+                    unsigned int nForceNumber;
+                    for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
+                    {
+                        unsigned int nForceCount = packet->GetForceCount(forcePlateIndex);
+
+                        if (nForceCount > 0)
+                        {
+                            nForceNumber = packet->GetForceNumber(forcePlateIndex);
+
+                            for (unsigned int forceIndex = 0; forceIndex < nForceCount; forceIndex++)
+                            {
+                                if (packet->GetForceData(forcePlateIndex, forceIndex, sForce))
+                                {
+                                    //fprintf(logfile, "Frame %8d Force:\tX=%f,\tY=%f,\tZ=%f\n", nForceNumber++,
+                                    //    sForce.fForceX, sForce.fForceY, sForce.fForceZ);
+                                    //fprintf(logfile, "               Moment:\tX=%f,\tY=%f,\tZ=%f\n",
+                                    //    sForce.fMomentX, sForce.fMomentY, sForce.fMomentZ);
+                                    //fprintf(logfile, "               Point:\tX=%f,\tY=%f,\tZ=%f\n",
+                                    //    sForce.fApplicationPointX, sForce.fApplicationPointY, sForce.fApplicationPointZ);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -625,6 +668,20 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
         for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
         {
             const FName name = mRTProtocol->Get3DLabelName(markerIndex);
+
+            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
+            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
+
+            EncounteredSubjects.Add({ SourceGuid, name });
+        }
+    }
+    if (Settings.StreamForce)
+    {
+        const auto forcePlateCount = mRTProtocol->GetForcePlateCount();
+
+        for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
+        {
+            const FName name = "Force plate " + forcePlateIndex+1;
 
             FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
             Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
