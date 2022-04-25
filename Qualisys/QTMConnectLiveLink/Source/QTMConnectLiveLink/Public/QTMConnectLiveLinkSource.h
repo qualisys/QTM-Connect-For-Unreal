@@ -12,6 +12,8 @@
 #include "SocketSubsystem.h"
 #include <memory>
 #include <vector>
+#include <unordered_map>
+#include <utility>
 
 class ILiveLinkClient;
 class CRTProtocol;
@@ -106,4 +108,6 @@ private:
     TArray<FLiveLinkSubjectKey> EncounteredSubjects;
 
     std::shared_ptr<CRTProtocol> mRTProtocol;
+
+	std::unordered_map<std::uint32_t, std::pair<FString, std::uint32_t>> mForceIdToNameAndFrequency;
 };

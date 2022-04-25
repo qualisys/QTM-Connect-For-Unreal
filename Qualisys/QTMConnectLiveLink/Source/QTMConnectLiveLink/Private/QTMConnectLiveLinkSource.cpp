@@ -6,6 +6,7 @@
 #include "Roles/LiveLinkAnimationRole.h"
 #include "Roles/LiveLinkTransformRole.h"
 #include "Roles/LiveLinkTransformTypes.h"
+#include "Roles/LiveLinkBasicRole.h"
 
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
@@ -577,35 +578,45 @@ uint32 FQTMConnectLiveLinkSource::Run()
             {
                 const auto forcePlateCount = packet->GetForcePlateCount();
 
-                if (forcePlateCount > 0)
+                CRTPacket::SForce force;
+                unsigned int forceNumber;
+                for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
                 {
-                    CRTPacket::SForce sForce;
-                    unsigned int nForceNumber;
-                    for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
+                    const auto forceCount = packet->GetForceCount(forcePlateIndex);
+                    const auto forcePlateId = packet->GetForcePlateId(forcePlateIndex);
+                    const auto forceName = FName(mForceIdToNameAndFrequency[forcePlateId].first);
+
+                    if (forceCount > 0)
                     {
-                        unsigned int nForceCount = packet->GetForceCount(forcePlateIndex);
+                        forceNumber = packet->GetForceNumber(forcePlateIndex);
 
-                        if (nForceCount > 0)
+                        for (unsigned int forceIndex = 0; forceIndex < forceCount; forceIndex++)
                         {
-                            nForceNumber = packet->GetForceNumber(forcePlateIndex);
-
-                            for (unsigned int forceIndex = 0; forceIndex < nForceCount; forceIndex++)
+                            FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkBaseFrameData::StaticStruct());
+                            FLiveLinkBaseFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkBaseFrameData>();
+                            if (packet->GetForceData(forcePlateIndex, forceIndex, force))
                             {
-                                if (packet->GetForceData(forcePlateIndex, forceIndex, sForce))
-                                {
-                                    //fprintf(logfile, "Frame %8d Force:\tX=%f,\tY=%f,\tZ=%f\n", nForceNumber++,
-                                    //    sForce.fForceX, sForce.fForceY, sForce.fForceZ);
-                                    //fprintf(logfile, "               Moment:\tX=%f,\tY=%f,\tZ=%f\n",
-                                    //    sForce.fMomentX, sForce.fMomentY, sForce.fMomentZ);
-                                    //fprintf(logfile, "               Point:\tX=%f,\tY=%f,\tZ=%f\n",
-                                    //    sForce.fApplicationPointX, sForce.fApplicationPointY, sForce.fApplicationPointZ);
-                                }
+                                subjectFrame.PropertyValues.Add(force.fForceX);
+                                subjectFrame.PropertyValues.Add(force.fForceY);
+                                subjectFrame.PropertyValues.Add(force.fForceZ);
+                                subjectFrame.PropertyValues.Add(force.fMomentX);
+                                subjectFrame.PropertyValues.Add(force.fMomentY);
+                                subjectFrame.PropertyValues.Add(force.fMomentZ);
+                                subjectFrame.PropertyValues.Add(force.fApplicationPointX);
+                                subjectFrame.PropertyValues.Add(force.fApplicationPointY);
+                                subjectFrame.PropertyValues.Add(force.fApplicationPointZ);
                             }
+
+                            const auto forcePeriod = (1 / mForceIdToNameAndFrequency[forcePlateId].second);
+
+                            subjectFrame.WorldTime = FLiveLinkWorldTime(FPlatformTime::Seconds() + forcePeriod * forceIndex);
+                            subjectFrame.MetaData.SceneTime = sceneTime;
+
+                            Client->PushSubjectFrameData_AnyThread({ SourceGuid, forceName }, MoveTemp(frameDataStruct));
                         }
                     }
                 }
             }
-
         }
     }
 
@@ -683,11 +694,26 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
 
         for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
         {
-            const auto name = FName(*FString::Format(TEXT("Force plate {0}"), TArray<FStringFormatArg>{ forcePlateIndex + 1 }));
+            unsigned int        nPlateID, nAnalogDeviceID, nFrequency;
+            float               fLength, fWidth;
+            char* pType;
+            char* pName;
+            mRTProtocol->GetForcePlate(forcePlateIndex, nPlateID, nAnalogDeviceID, nFrequency, pType, pName, fLength, fWidth);
 
-            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
-            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
+            mForceIdToNameAndFrequency[nPlateID] = { pName, nFrequency };
+            const auto name = FName(pName);
 
+            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkBaseStaticData::StaticStruct());
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Force X"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Force Y"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Force Z"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Moment X"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Moment Y"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Moment Z"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Application Point X"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Application Point Y"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Application Point Z"));
+            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkBasicRole::StaticClass(), MoveTemp(subjectDataStruct));
             EncounteredSubjects.Add({ SourceGuid, name });
         }
     }
@@ -703,6 +729,7 @@ void FQTMConnectLiveLinkSource::ClearSubjects()
         Client->RemoveSubject_AnyThread(subject);
     }
     EncounteredSubjects.Empty();
+    mForceIdToNameAndFrequency.clear();
 }
 
 #pragma optimize("", on)
