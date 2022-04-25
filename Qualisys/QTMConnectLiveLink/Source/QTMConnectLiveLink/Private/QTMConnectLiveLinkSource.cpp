@@ -289,10 +289,12 @@ uint32 FQTMConnectLiveLinkSource::Run()
             bool any3DSettings = false;
             bool anySkeletonSettings = false;
             bool any6DOFSettings = false;
+            bool anyForceSettings = false;
             if (mRTProtocol->ReadGeneralSettings() &&
                 mRTProtocol->Read3DSettings(any3DSettings) &&
                 mRTProtocol->ReadSkeletonSettings(anySkeletonSettings) &&
-                mRTProtocol->Read6DOFSettings(any6DOFSettings))
+                mRTProtocol->Read6DOFSettings(any6DOFSettings) &&
+                mRTProtocol->ReadForceSettings(anyForceSettings))
             {
                 readSettings = true;
 
@@ -681,7 +683,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
 
         for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
         {
-            const FName name = "Force plate " + forcePlateIndex+1;
+            const auto name = FName(*FString::Format(TEXT("Force plate {0}"), TArray<FStringFormatArg>{ forcePlateIndex + 1 }));
 
             FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
             Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
