@@ -331,7 +331,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
             }
             if (Settings.StreamForce)
             {
-                components |= CRTProtocol::cComponentForce;
+                components |= CRTProtocol::cComponentForceSingle;
             }
             
             CRTProtocol::EStreamRate streamRate = CRTProtocol::RateAllFrames;
@@ -576,45 +576,33 @@ uint32 FQTMConnectLiveLinkSource::Run()
             }
 
             {
-                const auto forcePlateCount = packet->GetForcePlateCount();
+                const auto forcePlateCount = packet->GetForceSinglePlateCount();
 
                 CRTPacket::SForce force;
-                unsigned int forceNumber;
-                for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
+                for (auto forcePlateIndex = 0u; forcePlateIndex < forcePlateCount; forcePlateIndex++)
                 {
-                    const auto forceCount = packet->GetForceCount(forcePlateIndex);
-                    const auto forcePlateId = packet->GetForcePlateId(forcePlateIndex);
-                    const auto forceName = FName(mForceIdToNameAndFrequency[forcePlateId].first);
+                    const auto forcePlateId = packet->GetForceSinglePlateId(forcePlateIndex);
+                    const auto forceName = FName(mForceIdToName[forcePlateId]);
 
-                    if (forceCount > 0)
+                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkBaseFrameData::StaticStruct());
+                    FLiveLinkBaseFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkBaseFrameData>();
+                    if (packet->GetForceSingleData(forcePlateIndex, force))
                     {
-                        forceNumber = packet->GetForceNumber(forcePlateIndex);
-
-                        for (unsigned int forceIndex = 0; forceIndex < forceCount; forceIndex++)
-                        {
-                            FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkBaseFrameData::StaticStruct());
-                            FLiveLinkBaseFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkBaseFrameData>();
-                            if (packet->GetForceData(forcePlateIndex, forceIndex, force))
-                            {
-                                subjectFrame.PropertyValues.Add(force.fForceX);
-                                subjectFrame.PropertyValues.Add(force.fForceY);
-                                subjectFrame.PropertyValues.Add(force.fForceZ);
-                                subjectFrame.PropertyValues.Add(force.fMomentX);
-                                subjectFrame.PropertyValues.Add(force.fMomentY);
-                                subjectFrame.PropertyValues.Add(force.fMomentZ);
-                                subjectFrame.PropertyValues.Add(force.fApplicationPointX);
-                                subjectFrame.PropertyValues.Add(force.fApplicationPointY);
-                                subjectFrame.PropertyValues.Add(force.fApplicationPointZ);
-                            }
-
-                            const auto forcePeriod = (1 / mForceIdToNameAndFrequency[forcePlateId].second);
-
-                            subjectFrame.WorldTime = FLiveLinkWorldTime(FPlatformTime::Seconds() + forcePeriod * forceIndex);
-                            subjectFrame.MetaData.SceneTime = sceneTime;
-
-                            Client->PushSubjectFrameData_AnyThread({ SourceGuid, forceName }, MoveTemp(frameDataStruct));
-                        }
+                        subjectFrame.PropertyValues.Add(force.fForceX);
+                        subjectFrame.PropertyValues.Add(force.fForceY);
+                        subjectFrame.PropertyValues.Add(force.fForceZ);
+                        subjectFrame.PropertyValues.Add(force.fMomentX);
+                        subjectFrame.PropertyValues.Add(force.fMomentY);
+                        subjectFrame.PropertyValues.Add(force.fMomentZ);
+                        subjectFrame.PropertyValues.Add(force.fApplicationPointX);
+                        subjectFrame.PropertyValues.Add(force.fApplicationPointY);
+                        subjectFrame.PropertyValues.Add(force.fApplicationPointZ);
                     }
+
+                    subjectFrame.WorldTime = worldTime;
+                    subjectFrame.MetaData.SceneTime = sceneTime;
+
+                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, forceName }, MoveTemp(frameDataStruct));
                 }
             }
         }
@@ -700,7 +688,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
             char* pName;
             mRTProtocol->GetForcePlate(forcePlateIndex, nPlateID, nAnalogDeviceID, nFrequency, pType, pName, fLength, fWidth);
 
-            mForceIdToNameAndFrequency[nPlateID] = { pName, nFrequency };
+            mForceIdToName[nPlateID] = pName;
             const auto name = FName(pName);
 
             FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkBaseStaticData::StaticStruct());
@@ -729,7 +717,7 @@ void FQTMConnectLiveLinkSource::ClearSubjects()
         Client->RemoveSubject_AnyThread(subject);
     }
     EncounteredSubjects.Empty();
-    mForceIdToNameAndFrequency.clear();
+    mForceIdToName.clear();
 }
 
 #pragma optimize("", on)

@@ -21,7 +21,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
     [
         SNew(SBox)
         .WidthOverride(250)
-        .HeightOverride(220)
+        .HeightOverride(230)
         [
             SNew(SVerticalBox)
 

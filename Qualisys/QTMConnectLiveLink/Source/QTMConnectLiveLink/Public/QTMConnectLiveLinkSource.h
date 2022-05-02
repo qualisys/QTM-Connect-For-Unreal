@@ -109,5 +109,5 @@ private:
 
     std::shared_ptr<CRTProtocol> mRTProtocol;
 
-	std::unordered_map<std::uint32_t, std::pair<FString, std::uint32_t>> mForceIdToNameAndFrequency;
+    std::unordered_map<std::uint32_t, FString> mForceIdToName;
 };
