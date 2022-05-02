@@ -1,8 +1,8 @@
 {
   "FileVersion": 3,
   "FriendlyName": "QTMConnectLiveLink",
-  "Version" : 1.3,
-  "VersionName" : "1.3",
+  "Version" : 1.2,
+  "VersionName" : "1.2",
   "Description": "LiveLink Source for receiving Qualisys Track Manager skeleton data",
   "Category": "Qualisys",
   "CreatedBy": "Qualisys",
