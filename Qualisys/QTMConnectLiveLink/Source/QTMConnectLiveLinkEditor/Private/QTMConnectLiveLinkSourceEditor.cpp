@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2022 Qualisys
 //
 #include "QTMConnectLiveLinkSourceEditor.h"
 #include "Widgets/Layout/SBox.h"
