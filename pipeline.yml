@@ -3,12 +3,6 @@ trigger:
 
 pool: Unreal
 
-resources:
-  repositories:
-    - repository: devops
-      type: git
-      name: plugins-unreal-publishing
-      
 variables: 
 - template: variables.yml@devops
 
