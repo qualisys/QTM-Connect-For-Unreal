@@ -13,4 +13,4 @@ variables:
 - template: template-variables.yml@devops
 
 extends:
-  template: pipeline-github.yml@devops
+  template: template-github.yml@devops
