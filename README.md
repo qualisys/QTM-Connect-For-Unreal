@@ -42,6 +42,10 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, 
 1. Select your actor and Add Component `Live Link Controller`.
 2. Enter the rigid body name as subject name and `LiveLinkTransformRole` as role.
 
+### Stream force data
+1. Each force plate is a livelink subject with the `basic` role. 
+2. The force subject contains the following 9 properties in order. (`Force X`, `Force Y`, `Force Z`, `Moment X`, `Moment Y`, `Moment Z`, `Application Point X`, `Application Point Y`, `Application Point Z`)
+
 *Note: Avoid mixing the LiveLink plugin data with the QualisysClient plugin. Synchronization of data might differ.*
 
 ## How to use the QualisysClient Actor object and QualisysRigidBody ActorComponent object
