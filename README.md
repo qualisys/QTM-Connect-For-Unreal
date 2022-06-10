@@ -1,4 +1,4 @@
-# QTM Connect for Unreal
+# QTM Connect for Unreal2
 
 QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, rigid body and marker data between Qualisys Track Manager and Unreal Engine.
 
