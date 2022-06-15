@@ -64,6 +64,11 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
         return IsStreamSkeleton();
     }
 
+    bool GetStreamForce() const
+    {
+        return IsStreamForce();
+    }
+
     FString GetStreamRate() const
     {
         return *StreamRatesTB->GetSelectedItem();
@@ -84,6 +89,7 @@ private:
     TSharedPtr<SCheckBox> Stream3dCB;
     TSharedPtr<SCheckBox> Stream6dCB;
     TSharedPtr<SCheckBox> StreamSkeletonCB;
+    TSharedPtr<SCheckBox> StreamForceCB;
 
     bool IsAutoConnect() const
     {
@@ -103,6 +109,11 @@ private:
     bool IsStreamSkeleton() const
     {
         return StreamSkeletonCB->IsChecked();
+    }
+
+    bool IsStreamForce() const
+    {
+        return StreamForceCB->IsChecked();
     }
 
     FReply CreateSource() const;
