@@ -10,7 +10,7 @@ resources:
       name: plugins-unreal-publishing
       
 variables: 
-- template: variables.yml@devops
+- template: template-variables.yml@devops
 
 extends:
-  template: trigger.yml@devops
+  template: template-github.yml@devops
