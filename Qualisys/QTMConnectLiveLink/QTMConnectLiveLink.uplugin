@@ -19,6 +19,9 @@
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Win64"
+			],
+			"BlacklistPlatforms":[
+				"Android","Linux","PS4","HTML5","Mac","IOS","XBoxOne"
 			]
 		},
 		{
@@ -27,6 +30,9 @@
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Win64"
+			],
+			"BlacklistPlatforms":[
+				"Android","Linux","PS4","HTML5","Mac","IOS","XBoxOne"
 			]
 		}
 	],
