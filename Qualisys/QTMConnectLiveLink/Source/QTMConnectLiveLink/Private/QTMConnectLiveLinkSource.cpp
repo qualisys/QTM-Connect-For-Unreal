@@ -1,6 +1,7 @@
 // QTM Connect For Unreal. Copyright 2018-2022 Qualisys
 //
 #include "QTMConnectLiveLinkSource.h"
+#include "QTMConnectLiveLinkLog.h"
 #include "ILiveLinkClient.h"
 #include "LiveLinkTypes.h"
 #include "Roles/LiveLinkAnimationRole.h"
@@ -8,11 +9,15 @@
 #include "Roles/LiveLinkTransformTypes.h"
 #include "Roles/LiveLinkBasicRole.h"
 
+#if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
+#endif
 #include "RTProtocol.h"
+#if PLATFORM_WINDOWS
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
+#endif
 #include "CommonFrameRates.h"
 
 #include <string>
@@ -265,7 +270,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message))
                         {
                             char serverAddr[40];
-                            sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
+                            UE_LOG(QTMConnectLiveLinkLog,Log,TEXT("%d.%d.%d.%d"),0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
                             serverAddress = serverAddr;
                         }
                     }
@@ -446,7 +451,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     }
                     case CRTPacket::TimecodeCamerTime:
                     {
-                        unsigned __int64 cameraTime;
+                        uint64 cameraTime; //on windows platforms uint64 resolves to unsigned long long which is synonymous with unsigned __int64
                         packet->GetTimecodeCameraTime(cameraTime);
                         const auto seconds = (cameraTime / 10000000);
                         ConstructLiveLinkTimeCode(timecodeFrequency, seconds, sceneTime);
