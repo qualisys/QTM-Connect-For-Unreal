@@ -8,6 +8,8 @@
 #include "Roles/LiveLinkTransformRole.h"
 #include "Roles/LiveLinkTransformTypes.h"
 #include "Roles/LiveLinkBasicRole.h"
+#include "Roles/LiveLinkCameraRole.h"
+#include "Roles/LiveLinkCameraTypes.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -517,9 +519,17 @@ uint32 FQTMConnectLiveLinkSource::Run()
                 const auto rigidBodyCount = packet->Get6DOFBodyCount();
                 for (unsigned int rigidBodyIndex = 0; rigidBodyIndex < rigidBodyCount; rigidBodyIndex++)
                 {
-                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkTransformFrameData::StaticStruct());
+                    const FName rigidBodyName = mRTProtocol->Get6DOFBodyName(rigidBodyIndex);
+                    FLiveLinkFrameDataStruct frameDataStruct;
+                    if (rigidBodyName.ToString().StartsWith("cam_", ESearchCase::Type::IgnoreCase))
+                    {
+                        frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkCameraFrameData::StaticStruct());
+                    }
+                    else
+                    {
+                        frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkTransformFrameData::StaticStruct());
+                    }
                     FLiveLinkTransformFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkTransformFrameData>();
-
                     float x, y, z;
                     float R[9];
                     if (packet->Get6DOFBody(rigidBodyIndex, x, y, z, R))
@@ -537,8 +547,6 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                         subjectFrame.WorldTime = worldTime;
                         subjectFrame.MetaData.SceneTime = sceneTime;
-
-                        const FName rigidBodyName = mRTProtocol->Get6DOFBodyName(rigidBodyIndex);
 
                         Client->PushSubjectFrameData_AnyThread({ SourceGuid, rigidBodyName }, MoveTemp(frameDataStruct));
                     }
@@ -660,10 +668,16 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
         for (unsigned int rigidBodyIndex = 0; rigidBodyIndex < rigidBodyCount; rigidBodyIndex++)
         {
             const FName name = mRTProtocol->Get6DOFBodyName(rigidBodyIndex);
-
-            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
-            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
-
+            if (name.ToString().StartsWith("cam_", ESearchCase::Type::IgnoreCase))
+            {
+                FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkCameraStaticData::StaticStruct());
+                Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkCameraRole::StaticClass(), MoveTemp(subjectDataStruct));
+            }
+            else
+            {
+                FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
+                Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
+            }
             EncounteredSubjects.Add({ SourceGuid, name });
         }
     }
