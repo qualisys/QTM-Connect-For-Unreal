@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2022 Qualisys
 //
 #pragma once
 
@@ -6,12 +6,17 @@
 #include "MessageEndpoint.h"
 #include "IMessageContext.h"
 #include "HAL/ThreadSafeBool.h"
+#include "HAL/Runnable.h"
+#include "HAL/RunnableThread.h"
 
-#include "Networking.h"
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include <memory>
 #include <vector>
+#include <unordered_map>
+
+
+
 
 class ILiveLinkClient;
 class CRTProtocol;
@@ -19,7 +24,7 @@ class CRTProtocol;
 class QTMCONNECTLIVELINK_API QTMConnectLiveLinkSettings
 {
 public:
-	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false), Stream3d(false), Stream6d(true), StreamSkeleton(true), StreamRate("All Frames"), FrequencyValue(0)
+	QTMConnectLiveLinkSettings() : IpAddress("127.0.0.1"), AutoDiscover(false), Stream3d(false), Stream6d(true), StreamSkeleton(true), StreamForce(false), StreamRate("All Frames"), FrequencyValue(0)
 	{
 	}
 
@@ -31,6 +36,7 @@ public:
 	bool Stream3d;
 	bool Stream6d;
 	bool StreamSkeleton;
+    bool StreamForce;
     FString StreamRate;
     unsigned int FrequencyValue;
     static const std::vector<FString> STREAMRATES;
@@ -105,4 +111,6 @@ private:
     TArray<FLiveLinkSubjectKey> EncounteredSubjects;
 
     std::shared_ptr<CRTProtocol> mRTProtocol;
+
+    std::unordered_map<std::uint32_t, FString> mForceIdToName;
 };

@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2022 Qualisys
 //
 #include "QTMConnectLiveLinkSourceEditor.h"
 #include "Widgets/Layout/SBox.h"
@@ -21,7 +21,7 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
     [
         SNew(SBox)
         .WidthOverride(250)
-        .HeightOverride(220)
+        .HeightOverride(230)
         [
             SNew(SVerticalBox)
 
@@ -129,6 +129,26 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 ]
             ]
             + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(3.0f)
+                [
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot()
+                .HAlign(HAlign_Left)
+                .FillWidth(0.5f)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("StreamForce", "Stream Force"))
+                ]
+            + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .FillWidth(0.5f)
+                [
+                    SAssignNew(StreamForceCB, SCheckBox)
+                    .IsChecked(ECheckBoxState::Unchecked)
+                ]
+                ]
+            + SVerticalBox::Slot()
             .AutoHeight()
             .Padding(3.0f)
             [
@@ -210,6 +230,7 @@ FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
     settings.Stream3d = this->GetStream3d();
     settings.Stream6d = this->GetStream6d();
     settings.StreamSkeleton = this->GetStreamSkeleton();
+    settings.StreamForce = this->GetStreamForce();
     settings.StreamRate = this->GetStreamRate();
     settings.FrequencyValue = this->GetFrequencyValue();
     OnPropertiesSelected.ExecuteIfBound(settings);

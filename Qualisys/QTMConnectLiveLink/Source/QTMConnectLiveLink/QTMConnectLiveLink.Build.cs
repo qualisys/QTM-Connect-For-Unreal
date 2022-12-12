@@ -1,4 +1,4 @@
-// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2022 Qualisys
 //
 using Path = System.IO.Path;
 using UnrealBuildTool;
@@ -58,7 +58,10 @@ public class QTMConnectLiveLink : ModuleRules
                 "Networking",
                 "Sockets",
                 "LiveLinkInterface",
-                "LiveLink"
+                "LiveLink",
+#if UE_5_0_OR_LATER
+                "LiveLinkAnimationCore",
+#endif
             }
         );
 
@@ -72,7 +75,10 @@ public class QTMConnectLiveLink : ModuleRules
                 "SlateCore",
                 "LiveLink",
                 "LiveLinkInterface",
-                "TimeManagement"
+                "TimeManagement",
+#if UE_5_0_OR_LATER
+                "LiveLinkAnimationCore",
+#endif
             }
         );
 

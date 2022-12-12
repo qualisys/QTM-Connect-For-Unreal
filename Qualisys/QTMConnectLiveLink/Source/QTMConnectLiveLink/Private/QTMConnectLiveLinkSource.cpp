@@ -1,19 +1,25 @@
-// QTM Connect For Unreal. Copyright 2018-2020 Qualisys
+// QTM Connect For Unreal. Copyright 2018-2022 Qualisys
 //
 #include "QTMConnectLiveLinkSource.h"
+#include "QTMConnectLiveLinkLog.h"
 #include "ILiveLinkClient.h"
 #include "LiveLinkTypes.h"
 #include "Roles/LiveLinkAnimationRole.h"
 #include "Roles/LiveLinkTransformRole.h"
 #include "Roles/LiveLinkTransformTypes.h"
+#include "Roles/LiveLinkBasicRole.h"
 #include "Roles/LiveLinkCameraRole.h"
 #include "Roles/LiveLinkCameraTypes.h"
 
+#if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
+#endif
 #include "RTProtocol.h"
+#if PLATFORM_WINDOWS
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
+#endif
 #include "CommonFrameRates.h"
 
 #include <string>
@@ -60,6 +66,12 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     {
         settings.StreamSkeleton = streamSkeleton == "true";
     }
+    settings.StreamForce = false;
+    FString streamForce;
+    if (FParse::Value(*settingsString, TEXT("StreamForce="), streamForce))
+    {
+        settings.StreamForce = streamForce == "true";
+    }
     settings.StreamRate = "All Frames";
     FString streamRate;
     if (FParse::Value(*settingsString, TEXT("StreamRate="), streamRate))
@@ -82,6 +94,7 @@ FString QTMConnectLiveLinkSettings::ToString() const
     settingsString.Append(FString::Printf(TEXT("Stream3d=\"%s\""), Stream3d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("Stream6d=\"%s\""), Stream6d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%s\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
+    settingsString.Append(FString::Printf(TEXT("StreamForce=\"%s\""), StreamForce ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamRate=\"%s\""), *StreamRate));
     settingsString.Append(FString::Printf(TEXT("FrequencyValue=\"%d\""), FrequencyValue));
     return settingsString;
@@ -259,7 +272,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message))
                         {
                             char serverAddr[40];
-                            sprintf_s(serverAddr, "%d.%d.%d.%d", 0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
+                            UE_LOG(QTMConnectLiveLinkLog,Log,TEXT("%d.%d.%d.%d"),0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
                             serverAddress = serverAddr;
                         }
                     }
@@ -284,10 +297,12 @@ uint32 FQTMConnectLiveLinkSource::Run()
             bool any3DSettings = false;
             bool anySkeletonSettings = false;
             bool any6DOFSettings = false;
+            bool anyForceSettings = false;
             if (mRTProtocol->ReadGeneralSettings() &&
                 mRTProtocol->Read3DSettings(any3DSettings) &&
                 mRTProtocol->ReadSkeletonSettings(anySkeletonSettings) &&
-                mRTProtocol->Read6DOFSettings(any6DOFSettings))
+                mRTProtocol->Read6DOFSettings(any6DOFSettings) &&
+                mRTProtocol->ReadForceSettings(anyForceSettings))
             {
                 readSettings = true;
 
@@ -320,6 +335,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
             if (Settings.StreamSkeleton)
             {
                 components |= CRTProtocol::cComponentSkeleton;
+            }
+            if (Settings.StreamForce)
+            {
+                components |= CRTProtocol::cComponentForceSingle;
             }
             
             CRTProtocol::EStreamRate streamRate = CRTProtocol::RateAllFrames;
@@ -434,7 +453,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     }
                     case CRTPacket::TimecodeCamerTime:
                     {
-                        unsigned __int64 cameraTime;
+                        uint64 cameraTime; //on windows platforms uint64 resolves to unsigned long long which is synonymous with unsigned __int64
                         packet->GetTimecodeCameraTime(cameraTime);
                         const auto seconds = (cameraTime / 10000000);
                         ConstructLiveLinkTimeCode(timecodeFrequency, seconds, sceneTime);
@@ -521,10 +540,10 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         }
 
                         FQuat rotation(FRotationMatrix::MakeFromXY(FVector(R[0], R[1], R[2]), FVector(R[3], R[4], R[5])));
-                        FVector position(-x, y, z);
+                        FVector position(x, -y, z);
                         position *= positionScalingFactor;
                         FVector scale(1.0, 1.0, 1.0);
-                        subjectFrame.Transform = FTransform(FQuat(rotation.X, -rotation.Y, -rotation.Z, rotation.W), position, scale);
+                        subjectFrame.Transform = FTransform(FQuat(-rotation.X, rotation.Y, -rotation.Z, rotation.W), position, scale);
 
                         subjectFrame.WorldTime = worldTime;
                         subjectFrame.MetaData.SceneTime = sceneTime;
@@ -540,13 +559,11 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                 if (markerCount > 0)
                 {
-                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkAnimationFrameData::StaticStruct());
-                    FLiveLinkAnimationFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkAnimationFrameData>();
-                    TArray<FTransform>& transforms = subjectFrame.Transforms;
-                    transforms.SetNumUninitialized(markerCount);
-
                     for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
                     {
+                        FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkTransformFrameData::StaticStruct());
+                        FLiveLinkTransformFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkTransformFrameData>();
+
                         float x, y, z;
                         if (packet->Get3DMarker(markerIndex, x, y, z))
                         {
@@ -555,20 +572,52 @@ uint32 FQTMConnectLiveLinkSource::Run()
                                 continue;
                             }
 
-                            FVector position(-x, y, z);
+                            FVector position(x, -y, z);
                             position *= positionScalingFactor;
                             FVector scale(1.0, 1.0, 1.0);
-                            transforms[markerIndex] = FTransform(FQuat::Identity, position, scale);
+                            subjectFrame.Transform = FTransform(FQuat::Identity, position, scale);
+
+                            subjectFrame.WorldTime = worldTime;
+                            subjectFrame.MetaData.SceneTime = sceneTime;
+                            
+                            const FName name = mRTProtocol->Get3DLabelName(markerIndex);
+
+                            Client->PushSubjectFrameData_AnyThread({ SourceGuid, name }, MoveTemp(frameDataStruct));
                         }
+                    }
+                }
+            }
+
+            {
+                const auto forcePlateCount = packet->GetForceSinglePlateCount();
+
+                CRTPacket::SForce force;
+                for (auto forcePlateIndex = 0u; forcePlateIndex < forcePlateCount; forcePlateIndex++)
+                {
+                    const auto forcePlateId = packet->GetForceSinglePlateId(forcePlateIndex);
+                    const auto forceName = FName(mForceIdToName[forcePlateId]);
+
+                    FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkBaseFrameData::StaticStruct());
+                    FLiveLinkBaseFrameData& subjectFrame = *frameDataStruct.Cast<FLiveLinkBaseFrameData>();
+                    if (packet->GetForceSingleData(forcePlateIndex, force))
+                    {
+                        subjectFrame.PropertyValues.Add(force.fForceX);
+                        subjectFrame.PropertyValues.Add(force.fForceY);
+                        subjectFrame.PropertyValues.Add(force.fForceZ);
+                        subjectFrame.PropertyValues.Add(force.fMomentX);
+                        subjectFrame.PropertyValues.Add(force.fMomentY);
+                        subjectFrame.PropertyValues.Add(force.fMomentZ);
+                        subjectFrame.PropertyValues.Add(force.fApplicationPointX);
+                        subjectFrame.PropertyValues.Add(force.fApplicationPointY);
+                        subjectFrame.PropertyValues.Add(force.fApplicationPointZ);
                     }
 
                     subjectFrame.WorldTime = worldTime;
                     subjectFrame.MetaData.SceneTime = sceneTime;
 
-                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, markersParentName }, MoveTemp(frameDataStruct));
+                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, forceName }, MoveTemp(frameDataStruct));
                 }
             }
-
         }
     }
 
@@ -636,25 +685,44 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
     {
         const auto markerCount = mRTProtocol->Get3DLabeledMarkerCount();
 
-        TArray<FName> markerNames;
-        markerNames.SetNumUninitialized(markerCount);
-        TArray<int32> markerParents;
-        markerParents.SetNumUninitialized(markerCount);
-
         for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
         {
-            markerNames[markerIndex] = mRTProtocol->Get3DLabelName(markerIndex);
-            markerParents[markerIndex] = -1;
+            const FName name = mRTProtocol->Get3DLabelName(markerIndex);
+
+            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkTransformStaticData::StaticStruct());
+            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkTransformRole::StaticClass(), MoveTemp(subjectDataStruct));
+
+            EncounteredSubjects.Add({ SourceGuid, name });
         }
+    }
+    if (Settings.StreamForce)
+    {
+        const auto forcePlateCount = mRTProtocol->GetForcePlateCount();
 
-        FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkSkeletonStaticData::StaticStruct());
-        FLiveLinkSkeletonStaticData& subjectRefSkeleton = *subjectDataStruct.Cast<FLiveLinkSkeletonStaticData>();
-        subjectRefSkeleton.SetBoneNames(markerNames);
-        subjectRefSkeleton.SetBoneParents(markerParents);
+        for (unsigned int forcePlateIndex = 0; forcePlateIndex < forcePlateCount; forcePlateIndex++)
+        {
+            unsigned int        nPlateID, nAnalogDeviceID, nFrequency;
+            float               fLength, fWidth;
+            char* pType;
+            char* pName;
+            mRTProtocol->GetForcePlate(forcePlateIndex, nPlateID, nAnalogDeviceID, nFrequency, pType, pName, fLength, fWidth);
 
-        Client->PushSubjectStaticData_AnyThread({ SourceGuid, markersParentName }, ULiveLinkAnimationRole::StaticClass(), MoveTemp(subjectDataStruct));
+            mForceIdToName[nPlateID] = pName;
+            const auto name = FName(pName);
 
-        EncounteredSubjects.Add({ SourceGuid, markersParentName });
+            FLiveLinkStaticDataStruct subjectDataStruct = FLiveLinkStaticDataStruct(FLiveLinkBaseStaticData::StaticStruct());
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Force X"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Force Y"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Force Z"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Moment X"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Moment Y"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Moment Z"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Application Point X"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Application Point Y"));
+            subjectDataStruct.GetBaseData()->PropertyNames.Add(FName("Application Point Z"));
+            Client->PushSubjectStaticData_AnyThread({ SourceGuid, name }, ULiveLinkBasicRole::StaticClass(), MoveTemp(subjectDataStruct));
+            EncounteredSubjects.Add({ SourceGuid, name });
+        }
     }
 }
 
@@ -668,6 +736,7 @@ void FQTMConnectLiveLinkSource::ClearSubjects()
         Client->RemoveSubject_AnyThread(subject);
     }
     EncounteredSubjects.Empty();
+    mForceIdToName.clear();
 }
 
 #pragma optimize("", on)

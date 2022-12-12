@@ -1,16 +1,16 @@
 trigger: 
 - main
+
 pool: Unreal
+
 resources:
   repositories:
     - repository: devops
       type: git
       name: plugins-unreal-publishing
+      
 variables: 
-- template: variables.yml@devops
-jobs:
-- job: Build
-  timeoutInMinutes: 180
-  steps:
-  - checkout: devops
-  - template: azure-pipelines.yml@devops
+- template: template-variables.yml@devops
+
+extends:
+  template: template-github.yml@devops
