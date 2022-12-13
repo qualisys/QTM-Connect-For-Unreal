@@ -3,21 +3,7 @@
 QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, rigid body, marker, force and timecode data between Qualisys Track Manager and Unreal Engine.
 
 ## Installation of the plugin
-
-*Note that the pre-built dll's for each version can be found here:*
-- *[UE 5.0EA](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_5.0EA)*
-- *[UE 4.27](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.27)*
-- *[UE 4.26](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.26)*
-- *[UE 4.25](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.25)*
-- *[UE 4.24](https://github.com/qualisys/QTM-Connect-For-Unreal/tree/Prebuilt-UE_4.24)*
-- *Note: Support for UE4.23 and below is also available but prebuilt binaries are currently not updated from lastest commits.*
-- *Note: If the plugin should be used in a unsupported Unreal Engine version then put it in the `Unreal project folder\Plugins` and rebuild project.*
-
-1. Copy the directory `.\Prebuilt\Qualisys` to `C:\Program Files\Epic Games\UE_4.xx\Engine\Plugins`.
-    -  _Optional: Copy `.\Example Project` to `C:\Users\<user>\Documents\Unreal Projects`_
-2. Start Unreal and create a project.
-    -  _Optional: Open Project `QualisysAvatar` from step 1._
-3. The plugin should appear in the plugin window as "QTM Connect For Unreal". Click Enable and restart Unreal to get it activated.
+You can find the plugin on unreal engine marketplace [here](https://www.unrealengine.com/marketplace/en-US/product/qualisys-qtm-connect-live-link)
 
 ## How to use the QTM Connect LiveLink plugin
 ### Start live link source
@@ -41,6 +27,8 @@ QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, 
 ### Stream rigid body data
 1. Select your actor and Add Component `Live Link Controller`.
 2. Enter the rigid body name as subject name and `LiveLinkTransformRole` as role.
+
+**Note: If you want to stream your rigid body as an camera role prefix the rigid body name with `cam_` (eg. `cam_rigidbody`)**
 
 ### Stream force data
 1. Each force plate is a livelink subject with the `basic` role. 
