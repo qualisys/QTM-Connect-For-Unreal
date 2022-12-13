@@ -43,7 +43,6 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 [
                     SAssignNew(IpAddress, SEditableTextBox)
                     .Text(LOCTEXT("DefaultQTMIpAddress", "127.0.0.1"))
-                    .IsEnabled(&SQTMConnectLiveLinkSourceEditor::IsAutoConnect)
                 ]
             ]
 
