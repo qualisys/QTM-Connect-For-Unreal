@@ -20,8 +20,8 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
     ChildSlot
     [
         SNew(SBox)
-        .WidthOverride(250)
-        .HeightOverride(230)
+        .WidthOverride(300)
+        .HeightOverride(210)
         [
             SNew(SVerticalBox)
 
