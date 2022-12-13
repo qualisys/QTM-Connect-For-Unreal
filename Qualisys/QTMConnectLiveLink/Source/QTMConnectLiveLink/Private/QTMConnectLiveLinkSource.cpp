@@ -42,12 +42,6 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
     {
         settings.IpAddress = "127.0.0.1";
     }
-    settings.AutoDiscover = false;
-    FString autoDiscover;
-    if (FParse::Value(*settingsString, TEXT("AutoDiscover="), autoDiscover))
-    {
-        settings.AutoDiscover = autoDiscover == "true";
-    }
     settings.Stream3d = false;
     FString stream3d;
     if (FParse::Value(*settingsString, TEXT("Stream3d="), stream3d))
@@ -90,7 +84,6 @@ QTMConnectLiveLinkSettings QTMConnectLiveLinkSettings::FromString(const FString&
 FString QTMConnectLiveLinkSettings::ToString() const
 {
     FString settingsString = FString::Printf(TEXT("IpAddress=\"%s\""), *IpAddress);
-    settingsString.Append(FString::Printf(TEXT("AutoDiscover=\"%s\""), AutoDiscover ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("Stream3d=\"%s\""), Stream3d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("Stream6d=\"%s\""), Stream6d ? TEXT("true") : TEXT("false")));
     settingsString.Append(FString::Printf(TEXT("StreamSkeleton=\"%s\""), StreamSkeleton ? TEXT("true") : TEXT("false")));
@@ -248,7 +241,6 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
     float timecodeFrequency = 24;
 
-    bool autoDiscover = Settings.AutoDiscover;
     std::string serverAddress(TCHAR_TO_ANSI(*(Settings.IpAddress)));
 
     while (!Stopping)
@@ -259,25 +251,6 @@ uint32 FQTMConnectLiveLinkSource::Run()
         }
         if (!mRTProtocol->Connected())
         {
-            if (autoDiscover)
-            {
-                if (mRTProtocol->DiscoverRTServer(0, false))
-                {
-                    const auto discoverResponses = mRTProtocol->GetNumberOfDiscoverResponses();
-                    if (discoverResponses >= 1)
-                    {
-                        unsigned int addr;
-                        unsigned short basePort;
-                        std::string message;
-                        if (mRTProtocol->GetDiscoverResponse(0, addr, basePort, message))
-                        {
-                            char serverAddr[40];
-                            UE_LOG(QTMConnectLiveLinkLog,Log,TEXT("%d.%d.%d.%d"),0xff & addr, 0xff & (addr >> 8), 0xff & (addr >> 16), 0xff & (addr >> 24));
-                            serverAddress = serverAddr;
-                        }
-                    }
-                }
-            }
             SourceMachineName = FText::FromString(serverAddress.c_str());
 
             unsigned short udpPort = 0;
@@ -374,7 +347,6 @@ uint32 FQTMConnectLiveLinkSource::Run()
             if (startedStreaming)
             {
                 DisconnectFromQTM();
-                autoDiscover = false;
             }
 
             ClearSubjects();
@@ -404,7 +376,6 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         if (startedStreaming)
                         {
                             DisconnectFromQTM();
-                            autoDiscover = false;
                         }
 
                         ClearSubjects();

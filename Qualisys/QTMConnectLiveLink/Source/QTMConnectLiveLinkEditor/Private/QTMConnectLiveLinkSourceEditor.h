@@ -44,11 +44,6 @@ class QTMCONNECTLIVELINKEDITOR_API SQTMConnectLiveLinkSourceEditor : public SCom
         return IpAddress.Get()->GetText().ToString();
     }
 
-    bool GetAutoDiscover() const
-    {
-        return IsAutoConnect();
-    }
-
     bool GetStream3d() const
     {
         return IsStream3d();
@@ -85,16 +80,10 @@ private:
     TArray<TSharedPtr<FString>> StreamRates;
     TSharedPtr<SEditableText> FrequencyValueText;
     TSharedPtr<SEditableTextBox> FrequencyValueTB;
-    TSharedPtr<SCheckBox> AutoDiscoverCB;
     TSharedPtr<SCheckBox> Stream3dCB;
     TSharedPtr<SCheckBox> Stream6dCB;
     TSharedPtr<SCheckBox> StreamSkeletonCB;
     TSharedPtr<SCheckBox> StreamForceCB;
-
-    bool IsAutoConnect() const
-    {
-        return AutoDiscoverCB->IsChecked();
-    }
 
     bool IsStream3d() const
     {

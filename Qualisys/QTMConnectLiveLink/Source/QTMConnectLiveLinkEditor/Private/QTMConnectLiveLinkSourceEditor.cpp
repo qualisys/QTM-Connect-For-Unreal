@@ -20,31 +20,10 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
     ChildSlot
     [
         SNew(SBox)
-        .WidthOverride(250)
-        .HeightOverride(230)
+        .WidthOverride(300)
+        .HeightOverride(210)
         [
             SNew(SVerticalBox)
-
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            .Padding(3.0f)
-            [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .HAlign(HAlign_Left)
-                .FillWidth(0.5f)
-                [
-                    SNew(STextBlock)
-                    .Text(LOCTEXT("AutoDiscover", "Auto Discover"))
-                ]
-                + SHorizontalBox::Slot()
-                .HAlign(HAlign_Fill)
-                .FillWidth(0.5f)
-                [
-                    SAssignNew(AutoDiscoverCB, SCheckBox)
-                    .IsChecked(ECheckBoxState::Checked)
-                ]
-            ]
 
             + SVerticalBox::Slot()
             .AutoHeight()
@@ -64,7 +43,6 @@ void SQTMConnectLiveLinkSourceEditor::Construct(const FArguments& Args)
                 [
                     SAssignNew(IpAddress, SEditableTextBox)
                     .Text(LOCTEXT("DefaultQTMIpAddress", "127.0.0.1"))
-                    .IsEnabled(&SQTMConnectLiveLinkSourceEditor::IsAutoConnect)
                 ]
             ]
 
@@ -226,7 +204,6 @@ FReply SQTMConnectLiveLinkSourceEditor::CreateSource() const
 {
     QTMConnectLiveLinkSettings settings;
     settings.IpAddress = this->GetIpAddress();
-    settings.AutoDiscover = this->GetAutoDiscover();
     settings.Stream3d = this->GetStream3d();
     settings.Stream6d = this->GetStream6d();
     settings.StreamSkeleton = this->GetStreamSkeleton();
