@@ -36,19 +36,6 @@ You can find the plugin on unreal engine marketplace [here](https://www.unrealen
 
 *Note: Avoid mixing the LiveLink plugin data with the QualisysClient plugin. Synchronization of data might differ.*
 
-## How to use the QualisysClient Actor object and QualisysRigidBody ActorComponent object
-
-1. The QualisysClient object is available in the UE4 Modes panel. This object handles the data streaming between QTM and Unreal.
-2. Drag and drop the QualisysClient object in the world.
-3. Select the QualisysClient instance and edit it's properties. (IP address of the machine running QTM, and stream rate (StreamRate of 0 will stream data as quick as possible).
-4. Add a Qualisys RigidBody component to a object in the World Outliner pane.
-5. Make sure the object is set to moveable.
-6. Set the RigidBody name to the name of the RigidBody in QTM.
-7. Play scene. It will automatically try and connect to QTM and receive 6DOF data.
-8. Use DebugDrawing setting in QualisysClient to display all labeled trajectories as spheres and all rigid bodies as cubes.
-
-*Note: To connect position of a component to position of a labeled trajectory use the QualisysTrajectory ActorComponent.*
-
 ## Video tutorials
 
 1. *[Streaming tutorial video](https://www.youtube.com/watch?v=lJ3CwEu2OxY)*
