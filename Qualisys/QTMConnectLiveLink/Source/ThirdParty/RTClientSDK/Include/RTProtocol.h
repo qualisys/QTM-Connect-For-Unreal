@@ -691,7 +691,7 @@ public:
     bool       StopCapture();
     bool       Calibrate(const bool refine, SCalibration &calibrationResult, int timeout = cWaitForCalibrationTimeout);
     bool       LoadCapture(const std::string& fileName);
-    bool       SaveCapture(const std::string& fileName, bool bOverwrite, std::string* newFileName = nullptr, int nSizeOfNewFileName = 0);
+    bool       SaveCapture(const std::string& fileName, bool bOverwrite, std::string* pNewFileName = nullptr, int nSizeOfNewFileName = 0);
     bool       LoadProject(const std::string& fileName);
     bool       Reprocess();
 
