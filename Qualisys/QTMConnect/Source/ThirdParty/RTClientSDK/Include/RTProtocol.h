@@ -698,7 +698,7 @@ public:
     static bool GetEventString(CRTPacket::EEvent eEvent, char* pStr);
     static bool ConvertRateString(const char* pRate, EStreamRate &eRate, unsigned int &nRateArg);
     static unsigned int ConvertComponentString(const std::string& componentsString);
-    static bool GetComponentString(std::string& pComponentStr, unsigned int nComponentType, const SComponentOptions& options = SComponentOptions());
+    static bool GetComponentString(std::string& componentStr, unsigned int nComponentType, const SComponentOptions& options = SComponentOptions());
     static std::vector<std::pair<unsigned int, std::string>> GetComponents(const std::string& componentsString);
     static bool GetComponent(std::string& componentStr, unsigned int &component, std::string& option);
 
