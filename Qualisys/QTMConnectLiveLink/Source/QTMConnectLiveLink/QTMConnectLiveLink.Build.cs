@@ -13,7 +13,7 @@ public class QTMConnectLiveLink : ModuleRules
         return Target.Platform == UnrealTargetPlatform.Win32 ? "Win32" : "Win64";
 #endif
     }
-    
+
     bool IsWindowsPlatform(ReadOnlyTargetRules Target)
     {
         bool bWindows =
@@ -24,17 +24,14 @@ public class QTMConnectLiveLink : ModuleRules
 
         return bWindows;
     }
-    
+
     public QTMConnectLiveLink(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-        
-        string rtClientSDKPath = Path.GetFullPath(Path.Combine(PluginDirectory, "Source/ThirdParty/RTClientSDK"));
-        string rtClientSDKIncludePath = System.IO.Path.Combine(rtClientSDKPath, "Include");
-        string targetPlatformPathName = GetTargetPlatformPathName(Target);
-        string rtClientSDKLibPath = Path.Combine(rtClientSDKPath, "Lib", targetPlatformPathName);
         string pluginPublicIncludePath = Path.Combine(ModuleDirectory, "Public");
         string pluginPrivateIncludePath = Path.Combine(ModuleDirectory, "Private");
+
+        string targetPlatformPathName = GetTargetPlatformPathName(Target);
 
         PublicIncludePaths.AddRange(
             new string[] {
@@ -42,14 +39,13 @@ public class QTMConnectLiveLink : ModuleRules
             }
         );
 
-
         PrivateIncludePaths.AddRange(
             new string[] {
-                pluginPrivateIncludePath,
-                rtClientSDKIncludePath,
+                pluginPrivateIncludePath
             }
         );
 
+        bEnableExceptions = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -64,7 +60,6 @@ public class QTMConnectLiveLink : ModuleRules
 #endif
             }
         );
-
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
@@ -81,14 +76,5 @@ public class QTMConnectLiveLink : ModuleRules
 #endif
             }
         );
-
-
-        PublicSystemIncludePaths.Add(rtClientSDKIncludePath);
-
-        if (IsWindowsPlatform(Target))
-        {
-            PublicAdditionalLibraries.Add(Path.Combine(rtClientSDKLibPath,"RTClientSDK.lib"));
-        }
-
     }
 }
