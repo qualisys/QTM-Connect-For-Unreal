@@ -186,10 +186,10 @@ float QtmToUEScalingFactor()
 }
 
 
-void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, FQualifiedFrameTime& timeCode)
+void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, float subframe, FQualifiedFrameTime& timeCode)
 {
     timeCode.Rate = FFrameRate(rate, 1);
-    FTimecode UnrealTimecode(hours, minutes, seconds, frames, false);
+    FTimecode UnrealTimecode(hours, minutes, seconds, frames, subframe, false);
 
     timeCode.Time = FFrameTime(UnrealTimecode.ToFrameNumber(timeCode.Rate));
 }
@@ -240,6 +240,8 @@ uint32 FQTMConnectLiveLinkSource::Run()
     bool startedStreaming = false;
 
     float timecodeFrequency = 24;
+    int smptePreviousFrame = -1;
+    float smpteSubframe = 0;
 
     std::string serverAddress(TCHAR_TO_ANSI(*(Settings.IpAddress)));
 
@@ -412,7 +414,22 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     {
                         int hours, minutes, seconds, frame;
                         packet->GetTimecodeSMPTE(hours, minutes, seconds, frame);
-                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
+                        const auto systemFrequency = mRTProtocol->GetSystemFrequency();
+
+                        const float relativeFrequency = (float)timecodeFrequency/(float)systemFrequency;
+
+                        if (smptePreviousFrame != frame) 
+                        {
+                            subFrame = 0.0;
+                        } 
+                        else
+                        {
+                            subFrame += relativeFrequency;
+                        }
+                        
+                        smptePreviousFrame = frame;
+
+                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, subFrame, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeIRIG:
