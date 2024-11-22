@@ -186,10 +186,10 @@ float QtmToUEScalingFactor()
 }
 
 
-void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, float subframe, FQualifiedFrameTime& timeCode)
+void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, FQualifiedFrameTime& timeCode)
 {
     timeCode.Rate = FFrameRate(rate, 1);
-    FTimecode UnrealTimecode(hours, minutes, seconds, frames, subframe, false);
+    FTimecode UnrealTimecode(hours, minutes, seconds, frames, false);
 
     timeCode.Time = FFrameTime(UnrealTimecode.ToFrameNumber(timeCode.Rate));
 }
@@ -240,8 +240,11 @@ uint32 FQTMConnectLiveLinkSource::Run()
     bool startedStreaming = false;
 
     float timecodeFrequency = 24;
-    int smptePreviousFrame = -1;
-    float smpteSubframe = 0;
+    
+    //Used for supporting 120hz smpte
+    int smpteConvertedFrame = 0; 
+
+    int smptePreviousFrame = 0;
 
     std::string serverAddress(TCHAR_TO_ANSI(*(Settings.IpAddress)));
 
@@ -415,21 +418,28 @@ uint32 FQTMConnectLiveLinkSource::Run()
                         int hours, minutes, seconds, frame;
                         packet->GetTimecodeSMPTE(hours, minutes, seconds, frame);
                         const auto systemFrequency = mRTProtocol->GetSystemFrequency();
-
-                        const float relativeFrequency = (float)timecodeFrequency/(float)systemFrequency;
-
-                        if (smptePreviousFrame != frame) 
+                        if (systemFrequency > timecodeFrequency)
                         {
-                            subFrame = 0.0;
-                        } 
-                        else
-                        {
-                            subFrame += relativeFrequency;
+                            const auto relativeFrequency = systemFrequency / timecodeFrequency;
+
+                            if (frame != smptePreviousFrame) 
+                            {
+                                smpteConvertedFrame = frame * relativeFrequency;
+                            } 
+                            else
+                            {
+                                smpteConvertedFrame += 1;
+                            }
+
+                            smptePreviousFrame = frame;
+
+                            ConstructLiveLinkTimeCode(systemFrequency, hours, minutes, seconds, smpteConvertedFrame, sceneTime);
                         }
-                        
-                        smptePreviousFrame = frame;
+                        else 
+                        {
+                            ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
+                        }
 
-                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, subFrame, sceneTime);
                         break;
                     }
                     case CRTPacket::TimecodeIRIG:
