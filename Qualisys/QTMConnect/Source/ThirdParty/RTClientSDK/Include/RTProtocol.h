@@ -663,14 +663,14 @@ public:
     bool       Connected() const;
     bool       SetVersion(int nMajorVersion, int nMinorVersion);
     bool       GetVersion(unsigned int &nMajorVersion, unsigned int &nMinorVersion);
-    bool       GetQTMVersion(std::string& verStr);
+    bool       GetQTMVersion(char* pVersion, unsigned int nVersionLen);
     bool       GetByteOrder(bool &bBigEndian);
-    bool       CheckLicense(const std::string& licenseCode);
+    bool       CheckLicense(const char* pLicenseCode);
     bool       DiscoverRTServer(unsigned short nServerPort, bool bNoLocalResponses, unsigned short nDiscoverPort = cDefaultAutoDiscoverPort);
     int        GetNumberOfDiscoverResponses();
     bool       GetDiscoverResponse(unsigned int nIndex, unsigned int &nAddr, unsigned short &nBasePort, std::string& message);
 
-    bool       GetCurrentFrame(const std::string& components);
+    bool       GetCurrentFrame(const char* components);
     bool       GetCurrentFrame(unsigned int nComponentType, const SComponentOptions& componentOptions = { });
     bool       StreamFrames(unsigned int nComponentType);
     bool       StreamFrames(EStreamRate eRate, unsigned int nRateArg, unsigned short nUDPPort, const char* pUDPAddr, const char* components);
@@ -680,8 +680,8 @@ public:
     bool       GetState(CRTPacket::EEvent &eEvent, bool bUpdate = true, int nTimeout = cWaitForDataTimeout);
     bool       GetCapture(const char* pFileName, bool bC3D);
     bool       SendTrig();
-    bool       SetQTMEvent(const std::string& label);
-    bool       TakeControl(const std::string& password = "");
+    bool       SetQTMEvent(const char* pLabel);
+    bool       TakeControl(const char* pPassword = nullptr);
     bool       ReleaseControl();
     bool       IsControlling();
     bool       NewMeasurement();
@@ -690,17 +690,17 @@ public:
     bool       StartRTOnFile();
     bool       StopCapture();
     bool       Calibrate(const bool refine, SCalibration &calibrationResult, int timeout = cWaitForCalibrationTimeout);
-    bool       LoadCapture(const std::string& fileName);
-    bool       SaveCapture(const std::string& fileName, bool bOverwrite, std::string* pNewFileName = nullptr, int nSizeOfNewFileName = 0);
-    bool       LoadProject(const std::string& fileName);
+    bool       LoadCapture(const char* pFileName);
+    bool       SaveCapture(const char* pFileName, bool bOverwrite, char* pNewFileName = nullptr, int nSizeOfNewFileName = 0);
+    bool       LoadProject(const char* pFileName);
     bool       Reprocess();
 
     static bool GetEventString(CRTPacket::EEvent eEvent, char* pStr);
     static bool ConvertRateString(const char* pRate, EStreamRate &eRate, unsigned int &nRateArg);
-    static unsigned int ConvertComponentString(const std::string& componentsString);
-    static bool GetComponentString(std::string& componentStr, unsigned int nComponentType, const SComponentOptions& options = SComponentOptions());
-    static std::vector<std::pair<unsigned int, std::string>> GetComponents(const std::string& componentsString);
-    static bool GetComponent(std::string& componentStr, unsigned int &component, std::string& option);
+    static unsigned int ConvertComponentString(const char* pComponentType);
+    static bool GetComponentString(char* pComponentStr, unsigned int nComponentType, const SComponentOptions& options = SComponentOptions());
+    static std::vector<std::pair<unsigned int, std::string>> GetComponents(const std::string componentsString);
+    static bool GetComponent(std::string componentStr, unsigned int &component, std::string &option);
 
     int        ReceiveRTPacket(CRTPacket::EPacketType &eType, bool bSkipEvents = true, int nTimeout = cWaitForDataTimeout); // nTimeout < 0 : Blocking receive
     
@@ -903,7 +903,7 @@ public:
 private:
     bool SendString(const char* pCmdStr, int nType);
     bool SendCommand(const char* pCmdStr);
-    bool SendCommand(const std::string& cmdStr, std::string& commandResponseStr, unsigned int timeout = cWaitForDataTimeout);
+    bool SendCommand(const char* pCmdStr, char* pCommandResponseStr, unsigned int timeout = cWaitForDataTimeout);
     bool SendXML(const char* pCmdStr);
     bool ReadSettings(std::string settingsType, CMarkup &oXML);
     void AddXMLElementBool(CMarkup* oXML, const char* tTag, const bool* pbValue, const char* tTrue = "True", const char* tFalse = "False");
