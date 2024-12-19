@@ -1,4 +1,4 @@
 [submodule "qualisys_cpp_sdk"]
 	path = qualisys_cpp_sdk
 	url = https://github.com/qualisys/qualisys_cpp_sdk.git
-	branch = smpte_subframes
+	branch = master
