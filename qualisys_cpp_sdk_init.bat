@@ -17,4 +17,4 @@ copy /Y "qualisys_cpp_sdk\Markup.h" "%dir_private%"
 copy /Y "qualisys_cpp_sdk\Network.h" "%dir_private%"
 copy /Y "qualisys_cpp_sdk\RTPacket.h" "%dir_private%"
 copy /Y "qualisys_cpp_sdk\RTProtocol.h" "%dir_private%"
-echo Copying files from qualisys_cpp_sdk into %dir_private%
+echo Done copying files from qualisys_cpp_sdk into %dir_private%
