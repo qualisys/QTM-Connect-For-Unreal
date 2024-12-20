@@ -29,5 +29,9 @@
 *.out
 *.app
 
+# Editor Settings
+.vs/
+.vscode/
+
 Qualisys/QTMConnect/Intermediate/
 Qualisys/QTMConnectLiveLink/Intermediate/

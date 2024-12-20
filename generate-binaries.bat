@@ -1,5 +1,12 @@
 @echo off
 
+rem Init qualisys_cpp_sdk submodule
+git submodule init
+git submodule update
+
+rem copy qualisys_cpp_sdk files
+call qualisys_cpp_sdk_init.bat
+
 fltmc >nul 2>&1 && (
   rem Running as admin.
 ) || (

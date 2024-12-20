@@ -10,12 +10,14 @@
 #include "Roles/LiveLinkBasicRole.h"
 #include "Roles/LiveLinkCameraRole.h"
 #include "Roles/LiveLinkCameraTypes.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
 #endif
-#include "RTProtocol.h"
+#include "RTClientSDK/RTPacket.h"
+#include "RTClientSDK/RTProtocol.h"
 #if PLATFORM_WINDOWS
 #include "Windows/HideWindowsPlatformAtomics.h"
 #include "Windows/HideWindowsPlatformTypes.h"
@@ -31,7 +33,6 @@
 const FName markersParentName = "Markers";
  
 #pragma optimize("", off)
-
 
 const std::vector<FString> QTMConnectLiveLinkSettings::STREAMRATES({"All Frames", "Frequency", "Frequency Divisor"});;
 
@@ -185,6 +186,15 @@ float QtmToUEScalingFactor()
     return 0.1f;
 }
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5) // UE Version >= 5.5
+void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, double normalizedSubFrame, FQualifiedFrameTime& timeCode)
+{
+    timeCode.Rate = FFrameRate(rate, 1);
+    FTimecode UnrealTimecode(hours, minutes, seconds, frames, false);
+
+    timeCode.Time = FFrameTime(UnrealTimecode.ToFrameNumber(timeCode.Rate), static_cast<float>(normalizedSubFrame));
+}
+#endif
 
 void ConstructLiveLinkTimeCode(int rate, int hours, int minutes, int seconds, int frames, FQualifiedFrameTime& timeCode)
 {
@@ -239,7 +249,8 @@ uint32 FQTMConnectLiveLinkSource::Run()
     bool readSettings = false;
     bool startedStreaming = false;
 
-    float timecodeFrequency = 24;
+    int timecodeFrequency = 24;
+    int systemFrequency = 24;
 
     std::string serverAddress(TCHAR_TO_ANSI(*(Settings.IpAddress)));
 
@@ -252,17 +263,30 @@ uint32 FQTMConnectLiveLinkSource::Run()
         if (!mRTProtocol->Connected())
         {
             SourceMachineName = FText::FromString(serverAddress.c_str());
+            SourceStatus = LOCTEXT("SourceStatus_Connected", "Connecting");            
 
-            unsigned short udpPort = 0;
-            if (!mRTProtocol->Connect(serverAddress.c_str(), QTM_STREAMING_PORT))
+            if(mRTProtocol->Connect(serverAddress.c_str(), QTM_STREAMING_PORT)) 
             {
-                SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
+                std::string qtmVersion;
+                if(mRTProtocol->GetQTMVersion(qtmVersion))
+                {
+                    UE_LOG(QTMConnectLiveLinkLog, Log, TEXT("Connected to %hs"), qtmVersion.data());
+                }
 
+                unsigned int major, minor;
+                if(mRTProtocol->GetVersion(major, minor))
+                {
+                    UE_LOG(QTMConnectLiveLinkLog, Log, TEXT("Using RT Protocol version %d.%d"), major, minor);
+                }
+
+                SourceStatus = LOCTEXT("SourceStatus_Connected", "Connected to QTM");
+            }
+            else
+            {
                 FPlatformProcess::Sleep(1.0f);
+                SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
                 continue;
             }
-
-            SourceStatus = LOCTEXT("SourceStatus_Connected", "Connected to QTM");
         }
 
         if (!readSettings)
@@ -279,7 +303,8 @@ uint32 FQTMConnectLiveLinkSource::Run()
             {
                 readSettings = true;
 
-                timecodeFrequency = CalculateTimecodeFrequency(mRTProtocol);
+                timecodeFrequency = static_cast<int>(std::round(CalculateTimecodeFrequency(mRTProtocol)));
+                systemFrequency = mRTProtocol->GetSystemFrequency();
 
                 CreateLiveLinkSubjects();
 
@@ -410,9 +435,27 @@ uint32 FQTMConnectLiveLinkSource::Run()
                     {
                     case CRTPacket::TimecodeSMPTE:
                     {
-                        int hours, minutes, seconds, frame;
-                        packet->GetTimecodeSMPTE(hours, minutes, seconds, frame);
-                        ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
+                        int hours, minutes, seconds, frame, subFrame;
+                        if(systemFrequency >= timecodeFrequency 
+                            && timecodeFrequency > 0 
+                            && packet->GetTimecodeSMPTE(hours, minutes, seconds, frame, subFrame) //return true for RTProtocol >= 1.27 only
+                        ) 
+                        {
+                            #if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5) // UE Version >= 5.5
+                                const auto normalizedSubFrame = CRTProtocol::SMPTENormalizedSubFrame(systemFrequency, timecodeFrequency, subFrame);
+                                ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, normalizedSubFrame, sceneTime);
+                            #else
+                                const auto relativeFrequency = systemFrequency / timecodeFrequency;
+                                const auto highSpeedFrame = frame * relativeFrequency + subFrame;
+                                ConstructLiveLinkTimeCode(systemFrequency, hours, minutes, seconds, highSpeedFrame, sceneTime);    
+                            #endif
+                        }
+                        else if(packet->GetTimecodeSMPTE(hours, minutes, seconds, frame))
+                        {
+                            //Legacy behaviour
+                            ConstructLiveLinkTimeCode(timecodeFrequency, hours, minutes, seconds, frame, sceneTime);
+                        }
+
                         break;
                     }
                     case CRTPacket::TimecodeIRIG:
