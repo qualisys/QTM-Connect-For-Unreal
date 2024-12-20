@@ -265,7 +265,7 @@ uint32 FQTMConnectLiveLinkSource::Run()
             SourceMachineName = FText::FromString(serverAddress.c_str());
             SourceStatus = LOCTEXT("SourceStatus_Connected", "Connecting");            
 
-            if(mRTProtocol->Connect(serverAddress.c_str(), QTM_STREAMING_PORT, nullptr)) 
+            if(mRTProtocol->Connect(serverAddress.c_str(), QTM_STREAMING_PORT)) 
             {
                 std::string qtmVersion;
                 if(mRTProtocol->GetQTMVersion(qtmVersion))
