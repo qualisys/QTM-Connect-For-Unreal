@@ -76,7 +76,7 @@ rem Localize "QTM Connect Unreal" plugin root path:
 echo.
 
 set "UNREAL_PLUGIN_SOURCE_PATH=%cd%\Qualisys"
-set "VERIFY_IF_CORRECT_FOLDER=%UNREAL_PLUGIN_SOURCE_PATH%\QTMConnect"
+set "VERIFY_IF_CORRECT_FOLDER=%UNREAL_PLUGIN_SOURCE_PATH%\QTMConnectLiveLink"
 
 if exist "%VERIFY_IF_CORRECT_FOLDER%" (
     echo "QTM Connect Unreal plugin found."
