@@ -9,11 +9,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "QTMConnect",
-			"Enabled": true,
-			"MarketplaceURL": "https://github.com/qualisys/Qualisys-Unreal-Plugin"
-		},
-		{
 			"Name": "QTMConnectLiveLink",
 			"Enabled": true,
 			"MarketplaceURL": "https://github.com/qualisys/Qualisys-Unreal-Plugin"
