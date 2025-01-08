@@ -36,11 +36,9 @@ You can find the plugin on unreal engine marketplace [here](https://www.unrealen
 
 *Note: Avoid mixing the LiveLink plugin data with the QualisysClient plugin. Synchronization of data might differ.*
 
-## Video tutorials
+## Video tutorial: How to use the Skeleton Solver with Unreal
 
-1. *[Streaming tutorial video](https://www.youtube.com/watch?v=lJ3CwEu2OxY)*
-2. *[Bone mapping tutorial video](https://www.youtube.com/watch?v=YZ24RH2_LZM)*
-3. *[How to import a Qualisys Track Manager exported FBX](https://www.youtube.com/watch?v=IC70NnnBw60)*
+https://www.qualisys.com/my/qacademy/#!/tutorials/how-to-use-the-skeleton-solver-with-unreal
 
 ## Supported Unreal Build Platforms
 
