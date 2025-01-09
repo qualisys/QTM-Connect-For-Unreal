@@ -5,6 +5,7 @@
 #include "BoneIndices.h"
 #include "CoreMinimal.h"
 #include "LiveLinkRetargetAsset.h"
+#include "Roles/LiveLinkAnimationTypes.h"
 #include "BonePose.h"
 #include "QualisysLiveLinkRetargetAsset.generated.h"
 
