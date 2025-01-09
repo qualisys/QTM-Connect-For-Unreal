@@ -7,7 +7,7 @@
 	"Category": "Qualisys",
 	"CreatedBy": "Qualisys",
 	"CreatedByURL": "https://www.qualisys.com/",
-	"DocsURL": "https://www.qualisys.com/software/real-time-sdk/",
+	"DocsURL": "https://github.com/qualisys/QTM-Connect-For-Unreal/",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/f7c205bbe7894bffa2fe2289d8c81643",
 	"SupportURL": "https://www.qualisys.com/support/",
 	"CanContainContent": true,
