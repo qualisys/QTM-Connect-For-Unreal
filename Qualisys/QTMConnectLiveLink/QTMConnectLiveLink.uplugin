@@ -18,10 +18,10 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
-				"Win64"
+				"Win64","Linux","Mac"
 			],
 			"BlacklistPlatforms":[
-				"Android","Linux","Mac","IOS"
+				"Android","IOS"
 			]
 		},
 		{
@@ -29,10 +29,10 @@
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
-				"Win64"
+				"Win64","Linux","Mac"
 			],
 			"BlacklistPlatforms":[
-				"Android","Linux","Mac","IOS"
+				"Android","IOS"
 			]
 		}
 	],
