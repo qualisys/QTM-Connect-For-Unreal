@@ -2,7 +2,7 @@
 QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, rigid body, marker, force and timecode data between Qualisys Track Manager and Unreal Engine.
 
 ## Installation of the plugin
-You can find the plugin on Unreal Engine Marketplace [here](https://www.fab.com/listings/0be18c14-a8d8-40fb-8932-89d07fc9774c)
+You can find the plugin on Unreal Engine Marketplace [HERE](https://www.fab.com/listings/0be18c14-a8d8-40fb-8932-89d07fc9774c)
 
 ## How to use the QTM Connect LiveLink plugin
 ### Start live link source
@@ -94,5 +94,5 @@ Note: In most cases, you can simply install and use this plugin directly from th
    - Launch the Unreal Editor and open your `.uproject` file.  
    - When prompted, allow Unreal to rebuild your plugin automatically.  
    - After the rebuild completes, the plugin should be available for use in your project.
-   - Open the Plugins view (`Edit -> Plugins`) enable ``QTMConnectLiveLink``
+   - Open the Plugins view (`Edit -> Plugins`). Enable ``QTMConnectLiveLink``
  
