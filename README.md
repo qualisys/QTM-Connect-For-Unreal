@@ -2,7 +2,7 @@
 QTM Connect for Unreal is an Unreal plugin that supports streaming of skeleton, rigid body, marker, force and timecode data between Qualisys Track Manager and Unreal Engine.
 
 ## Installation of the plugin
-You can find the plugin on unreal engine marketplace [here](https://www.unrealengine.com/marketplace/en-US/product/qualisys-qtm-connect-live-link)
+You can find the plugin on Unreal Engine Marketplace [here](https://www.fab.com/listings/0be18c14-a8d8-40fb-8932-89d07fc9774c)
 
 ## How to use the QTM Connect LiveLink plugin
 ### Start live link source
@@ -29,7 +29,7 @@ You can find the plugin on unreal engine marketplace [here](https://www.unrealen
 1. Select your actor and Add Component `Live Link Controller`.
 2. Enter the rigid body name as subject name and `LiveLinkTransformRole` as role.
 
-**Note: If you want to stream your rigid body as an camera role prefix the rigid body name with `cam_` (eg. `cam_rigidbody`)**
+**Note: If you want to stream your rigid body as a camera role prefix the rigid body name with `cam_` (eg. `cam_rigidbody`)**
 
 ### Stream force data
 1. Each force plate is a livelink subject with the `basic` role. 
@@ -46,7 +46,7 @@ https://www.qualisys.com/my/qacademy/#!/tutorials/how-to-use-the-skeleton-solver
 * Linux
 
 ## Building the Plugin with Unreal Engine
-Note: In most cases, you can simply install and use this plugin directly from the Unreal Marketplace. The instructions below are for those who need or prefer to build the plugin from source (e.g., for custom development or modifications).
+Note: In most cases, you can simply install and use this plugin directly from the Unreal Engine Marketplace. The instructions below are for those who need or prefer to build the plugin from source (e.g., for custom development or modifications).
 1. **Set Up Your Environment**  
    - Make sure your environment is ready to [build plugins](https://dev.epicgames.com/community/learning/tutorials/qz93/unreal-engine-building-plugins).  
    - Use a C++ Unreal Engine project and have the necessary SDKs installed (e.g., Visual Studio on Windows, Xcode on macOS, etc.).
@@ -94,3 +94,5 @@ Note: In most cases, you can simply install and use this plugin directly from th
    - Launch the Unreal Editor and open your `.uproject` file.  
    - When prompted, allow Unreal to rebuild your plugin automatically.  
    - After the rebuild completes, the plugin should be available for use in your project.
+   - Open the Plugins view (`Edit -> Plugins`) enable ``QTMConnectLiveLink``
+ 
