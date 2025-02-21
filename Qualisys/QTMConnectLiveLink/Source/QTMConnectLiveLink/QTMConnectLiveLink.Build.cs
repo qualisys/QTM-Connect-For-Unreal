@@ -9,6 +9,10 @@ public class QTMConnectLiveLink : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        bWarningsAsErrors = false;
+
+        ShadowVariableWarningLevel = WarningLevel.Off;
+
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public")
