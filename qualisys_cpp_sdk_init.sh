@@ -2,17 +2,12 @@
 set -e  # Exit on error
 
 dir_private="Qualisys/QTMConnectLiveLink/Source/QTMConnectLiveLink/Private/RTClientSDK"
-
 echo "Ensuring directory exists..."
 mkdir -p "$dir_private"
-
 echo "Copying files from qualisys_cpp_sdk into $dir_private"
 cp -u "qualisys_cpp_sdk/Deserializer.cpp" "$dir_private/"
 cp -u "qualisys_cpp_sdk/Deserializer.h" "$dir_private/"
-cp -u "qualisys_cpp_sdk/External/tinyxml2/LICENSE.txt" "$dir_private/tinyxml2.LICENSE.txt"
-cp -u "qualisys_cpp_sdk/External/tinyxml2/tinyxml2.cpp" "$dir_private/"
-cp -u "qualisys_cpp_sdk/External/tinyxml2/tinyxml2.h" "$dir_private/"
-cp -u "qualisys_cpp_sdk/LICENSE.md" "$dir_private/qualisys_cpp_sdk.LICENSE.md"
+cp -u "qualisys_cpp_sdk/LICENSE.md" "$dir_private/"
 cp -u "qualisys_cpp_sdk/Network.cpp" "$dir_private/"
 cp -u "qualisys_cpp_sdk/Network.h" "$dir_private/"
 cp -u "qualisys_cpp_sdk/RTPacket.cpp" "$dir_private/"
@@ -27,5 +22,13 @@ cp -u "qualisys_cpp_sdk/SettingsDeserializer.cpp" "$dir_private/"
 cp -u "qualisys_cpp_sdk/SettingsDeserializer.h" "$dir_private/"
 cp -u "qualisys_cpp_sdk/SettingsSerializer.cpp" "$dir_private/"
 cp -u "qualisys_cpp_sdk/SettingsSerializer.h" "$dir_private/"
-
 echo "Done copying files from qualisys_cpp_sdk into $dir_private"
+
+tinyxml2_private="Qualisys/QTMConnectLiveLink/Source/QTMConnectLiveLink/Private/RTClientSDK/External/tinyxml2/"
+echo "Ensuring directory exists..."
+mkdir -p "$tinyxml2_private"
+echo "Copying files from qualisys_cpp_sdk into $tinyxml2_private"
+cp -u "qualisys_cpp_sdk/External/tinyxml2/LICENSE.txt" "$tinyxml2_private/"
+cp -u "qualisys_cpp_sdk/External/tinyxml2/tinyxml2.cpp" "$tinyxml2_private/"
+cp -u "qualisys_cpp_sdk/External/tinyxml2/tinyxml2.h" "$tinyxml2_private/"
+echo "Done copying files from qualisys_cpp_sdk into $tinyxml2_private"
