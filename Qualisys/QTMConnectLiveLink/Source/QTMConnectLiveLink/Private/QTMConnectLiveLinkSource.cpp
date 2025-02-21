@@ -339,17 +339,17 @@ uint32 FQTMConnectLiveLinkSource::Run()
                 components |= CRTProtocol::cComponentForceSingle;
             }
             
-            CRTProtocol::EStreamRate streamRate = CRTProtocol::RateAllFrames;
+            CRTProtocol::EStreamRate streamRate = CRTProtocol::EStreamRate::RateAllFrames;
             if (Settings.StreamRate == "Frequency") 
             {
-                streamRate = CRTProtocol::RateFrequency;
+                streamRate = CRTProtocol::EStreamRate::RateFrequency;
             }
             else if (Settings.StreamRate == "Frequency Divisor") 
             {
-                streamRate = CRTProtocol::RateFrequencyDivisor;
+                streamRate = CRTProtocol::EStreamRate::RateFrequencyDivisor;
             }
 
-            if (!mRTProtocol->StreamFrames(streamRate, (streamRate != CRTProtocol::RateAllFrames) ? Settings.FrequencyValue : 0, 0, nullptr, components))
+            if (!mRTProtocol->StreamFrames(streamRate, (streamRate != CRTProtocol::EStreamRate::RateAllFrames) ? Settings.FrequencyValue : 0, 0, nullptr, components))
             {
                 SourceStatus = FText::FromString(ANSI_TO_TCHAR(mRTProtocol->GetErrorString()));
 
