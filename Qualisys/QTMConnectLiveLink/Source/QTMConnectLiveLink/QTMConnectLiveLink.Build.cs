@@ -8,22 +8,25 @@ public class QTMConnectLiveLink : ModuleRules
     public QTMConnectLiveLink(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-        string pluginPublicIncludePath = Path.Combine(ModuleDirectory, "Public");
-        string pluginPrivateIncludePath = Path.Combine(ModuleDirectory, "Private");
+
+        bWarningsAsErrors = false;
+
+        bEnableExceptions = true;
+
+        ShadowVariableWarningLevel = WarningLevel.Off;
 
         PublicIncludePaths.AddRange(
             new string[] {
-                pluginPublicIncludePath
+                Path.Combine(ModuleDirectory, "Public")
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                pluginPrivateIncludePath
+                Path.Combine(ModuleDirectory, "Private"),
+                Path.Combine(ModuleDirectory, "Private/RtClientSDK/External/tinyxml2")
             }
         );
-
-        bEnableExceptions = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
