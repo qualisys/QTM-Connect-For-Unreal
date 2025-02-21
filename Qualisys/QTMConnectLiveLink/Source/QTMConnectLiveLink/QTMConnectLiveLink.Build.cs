@@ -11,6 +11,8 @@ public class QTMConnectLiveLink : ModuleRules
 
         bWarningsAsErrors = false;
 
+        bEnableExceptions = true;
+
         ShadowVariableWarningLevel = WarningLevel.Off;
 
         PublicIncludePaths.AddRange(
@@ -25,8 +27,6 @@ public class QTMConnectLiveLink : ModuleRules
                 Path.Combine(ModuleDirectory, "Private/RtClientSDK/External/tinyxml2")
             }
         );
-
-        bEnableExceptions = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
