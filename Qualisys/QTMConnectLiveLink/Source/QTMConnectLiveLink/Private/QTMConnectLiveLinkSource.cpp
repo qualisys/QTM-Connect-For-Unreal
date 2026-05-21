@@ -12,6 +12,18 @@
 #include "Roles/LiveLinkCameraTypes.h"
 #include "Runtime/Launch/Resources/Version.h"
 
+// LiveLinkLocatorRole was introduced in UE 5.7. It carries a TArray<FVector> of
+// marker positions as one subject, rather than the legacy approach of pushing
+// one ULiveLinkTransformRole subject per marker. Includes are gated below; the
+// Stream3d branch chooses the right path at compile time.
+#define QTM_LIVELINK_LOCATOR_AVAILABLE \
+    (ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 7))
+
+#if QTM_LIVELINK_LOCATOR_AVAILABLE
+#include "Roles/LiveLinkLocatorRole.h"
+#include "Roles/LiveLinkLocatorTypes.h"
+#endif
+
 #if PLATFORM_WINDOWS
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/AllowWindowsPlatformAtomics.h"
@@ -568,11 +580,44 @@ uint32 FQTMConnectLiveLinkSource::Run()
             }
 
             {
-                // Push marker transforms
+                // Push marker positions
                 const auto markerCount = packet->Get3DMarkerCount();
 
                 if (markerCount > 0)
                 {
+#if QTM_LIVELINK_LOCATOR_AVAILABLE
+                    // UE 5.7+: one Locator frame carries the whole marker cloud.
+                    FLiveLinkFrameDataStruct frameDataStruct(FLiveLinkLocatorFrameData::StaticStruct());
+                    FLiveLinkLocatorFrameData& locatorFrame = *frameDataStruct.Cast<FLiveLinkLocatorFrameData>();
+                    locatorFrame.Locators.Reserve(markerCount);
+
+                    for (unsigned int markerIndex = 0; markerIndex < markerCount; ++markerIndex)
+                    {
+                        float x, y, z;
+                        if (!packet->Get3DMarker(markerIndex, x, y, z))
+                        {
+                            // Position not available; emit zero placeholder so the static name array
+                            // stays aligned with the locator array on this frame.
+                            locatorFrame.Locators.Add(FVector::ZeroVector);
+                            continue;
+                        }
+                        if (isnan(x) || isnan(y) || isnan(z))
+                        {
+                            locatorFrame.Locators.Add(FVector::ZeroVector);
+                            continue;
+                        }
+                        FVector position(x, -y, z);
+                        position *= positionScalingFactor;
+                        locatorFrame.Locators.Add(position);
+                    }
+
+                    locatorFrame.WorldTime = worldTime;
+                    locatorFrame.MetaData.SceneTime = sceneTime;
+
+                    static const FName SubjectName(TEXT("QTMMarkers"));
+                    Client->PushSubjectFrameData_AnyThread({ SourceGuid, SubjectName }, MoveTemp(frameDataStruct));
+#else
+                    // UE 5.6 and earlier: one transform frame per marker (legacy behavior).
                     for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
                     {
                         FLiveLinkFrameDataStruct frameDataStruct = FLiveLinkFrameDataStruct(FLiveLinkTransformFrameData::StaticStruct());
@@ -593,12 +638,13 @@ uint32 FQTMConnectLiveLinkSource::Run()
 
                             subjectFrame.WorldTime = worldTime;
                             subjectFrame.MetaData.SceneTime = sceneTime;
-                            
+
                             const FName name = mRTProtocol->Get3DLabelName(markerIndex);
 
                             Client->PushSubjectFrameData_AnyThread({ SourceGuid, name }, MoveTemp(frameDataStruct));
                         }
                     }
+#endif
                 }
             }
 
@@ -699,6 +745,26 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
     {
         const auto markerCount = mRTProtocol->Get3DLabeledMarkerCount();
 
+#if QTM_LIVELINK_LOCATOR_AVAILABLE
+        // UE 5.7+: one ULiveLinkLocatorRole subject carries the whole marker cloud.
+        // Use ULiveLinkMarkerVisualizer in your scene to render it.
+        TArray<FName> LocatorNames;
+        LocatorNames.Reserve(markerCount);
+        for (unsigned int markerIndex = 0; markerIndex < markerCount; ++markerIndex)
+        {
+            LocatorNames.Add(mRTProtocol->Get3DLabelName(markerIndex));
+        }
+
+        FLiveLinkStaticDataStruct subjectDataStruct(FLiveLinkLocatorStaticData::StaticStruct());
+        FLiveLinkLocatorStaticData& locatorStatic = *subjectDataStruct.Cast<FLiveLinkLocatorStaticData>();
+        locatorStatic.SetLocatorNames(LocatorNames);
+        locatorStatic.SetUnlabelledData(false);
+
+        const FName SubjectName(TEXT("QTMMarkers"));
+        Client->PushSubjectStaticData_AnyThread({ SourceGuid, SubjectName }, ULiveLinkLocatorRole::StaticClass(), MoveTemp(subjectDataStruct));
+        EncounteredSubjects.Add({ SourceGuid, SubjectName });
+#else
+        // UE 5.6 and earlier: one transform subject per marker (legacy behavior).
         for (unsigned int markerIndex = 0; markerIndex < markerCount; markerIndex++)
         {
             const FName name = mRTProtocol->Get3DLabelName(markerIndex);
@@ -708,6 +774,7 @@ void FQTMConnectLiveLinkSource::CreateLiveLinkSubjects()
 
             EncounteredSubjects.Add({ SourceGuid, name });
         }
+#endif
     }
     if (Settings.StreamForce)
     {
