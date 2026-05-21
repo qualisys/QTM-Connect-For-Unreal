@@ -9,6 +9,10 @@ public class QTMConnectLiveLink : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // Vendored RT SDK sources don't follow Unreal's IWYU "own header first" rule.
+        // Setting None disables IWYU validation for this module (KeepAsIs still validates).
+        IWYUSupport = IWYUSupport.None;
+
         bWarningsAsErrors = false;
 
         bEnableExceptions = true;
