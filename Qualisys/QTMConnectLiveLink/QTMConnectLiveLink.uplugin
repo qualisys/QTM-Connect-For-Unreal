@@ -34,12 +34,33 @@
 			"BlacklistPlatforms":[
 				"Android","IOS"
 			]
+		},
+		{
+			"Name": "QTMConnectLiveLinkDevice",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64","Linux","Mac"
+			],
+			"BlacklistPlatforms":[
+				"Android","IOS"
+			]
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "LiveLink",
 			"Enabled": true
+		},
+		{
+			"Name": "LiveLinkDevice",
+			"Enabled": true,
+			"Optional": true
+		},
+		{
+			"Name": "LiveLinkHub",
+			"Enabled": true,
+			"Optional": true
 		}
 	]
 }
