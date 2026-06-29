@@ -15,16 +15,17 @@ public class QTMConnectLiveLink : ModuleRules
 
         ShadowVariableWarningLevel = WarningLevel.Off;
 
-        // Silence MSVC C4996 "unsafe CRT function" warnings (strcpy/sprintf/...) coming
-        // from the vendored Qualisys C++ SDK (Private/RTClientSDK). The SDK is shared
-        // cross-platform code; we suppress here rather than editing the vendored source.
-        // The SDK .cpp files also do a bare `#define _CRT_SECURE_NO_WARNINGS`, but that
-        // lands too late under the shared PCH (the CRT headers are force-included first),
-        // so it doesn't suppress anything. We define it empty (note the trailing '=')
-        // rather than the default `=1` so it matches the SDK's bare define exactly and
-        // avoids a C4005 macro-redefinition warning; the CRT headers only test whether
-        // the macro is defined, not its value.
-        PrivateDefinitions.Add("_CRT_SECURE_NO_WARNINGS=");
+        // Silence the MSVC C4996 / Clang -Wdeprecated-declarations warnings
+        // (strcpy/sprintf/... "unsafe CRT function") emitted by the vendored Qualisys
+        // C++ SDK in Private/RTClientSDK. We use UBT's per-module deprecation warning
+        // control (UE 5.6+) rather than defining _CRT_SECURE_NO_WARNINGS ourselves: the
+        // define collided with the SDK .cpp files' own bare `#define _CRT_SECURE_NO_WARNINGS`
+        // (C4005 macro redefinition), and an empty-valued define is dropped by UBT so it
+        // suppressed nothing. DeprecationWarningLevel.Off emits /wd4996 for MSVC and
+        // -Wno-deprecated-declarations for Clang, so it also covers the Mac/Linux builds.
+#if UE_5_6_OR_LATER
+        CppCompileWarningSettings.DeprecationWarningLevel = WarningLevel.Off;
+#endif
 
         PublicIncludePaths.AddRange(
             new string[] {
