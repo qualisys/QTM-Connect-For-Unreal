@@ -18,7 +18,13 @@ public class QTMConnectLiveLink : ModuleRules
         // Silence MSVC C4996 "unsafe CRT function" warnings (strcpy/sprintf/...) coming
         // from the vendored Qualisys C++ SDK (Private/RTClientSDK). The SDK is shared
         // cross-platform code; we suppress here rather than editing the vendored source.
-        PrivateDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
+        // The SDK .cpp files also do a bare `#define _CRT_SECURE_NO_WARNINGS`, but that
+        // lands too late under the shared PCH (the CRT headers are force-included first),
+        // so it doesn't suppress anything. We define it empty (note the trailing '=')
+        // rather than the default `=1` so it matches the SDK's bare define exactly and
+        // avoids a C4005 macro-redefinition warning; the CRT headers only test whether
+        // the macro is defined, not its value.
+        PrivateDefinitions.Add("_CRT_SECURE_NO_WARNINGS=");
 
         PublicIncludePaths.AddRange(
             new string[] {
