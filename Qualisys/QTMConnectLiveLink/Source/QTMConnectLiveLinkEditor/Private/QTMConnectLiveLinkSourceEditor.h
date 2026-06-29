@@ -2,7 +2,7 @@
 //
 #pragma once
 
-#include "QtmConnectLiveLinkSource.h"
+#include "QTMConnectLiveLinkSource.h"
 
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Views/SListView.h"
