@@ -15,6 +15,11 @@ public class QTMConnectLiveLink : ModuleRules
 
         ShadowVariableWarningLevel = WarningLevel.Off;
 
+        // Silence MSVC C4996 "unsafe CRT function" warnings (strcpy/sprintf/...) coming
+        // from the vendored Qualisys C++ SDK (Private/RTClientSDK). The SDK is shared
+        // cross-platform code; we suppress here rather than editing the vendored source.
+        PrivateDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
+
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public")

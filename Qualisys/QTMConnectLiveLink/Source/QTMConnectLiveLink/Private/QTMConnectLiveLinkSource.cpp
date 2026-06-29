@@ -362,12 +362,12 @@ uint32 FQTMConnectLiveLinkSource::Run()
         }
 
         CRTPacket::EPacketType packetType;
-        int result = mRTProtocol->ReceiveRTPacket(packetType, false, 1000);
-        if (result == 0)
+        CNetwork::ResponseType result = mRTProtocol->Receive(packetType, false, 1000);
+        if (result == CNetwork::ResponseType::timeout || result == CNetwork::ResponseType::disconnect)
         {
             continue;
         }
-        else if (result < 0)
+        else if (result == CNetwork::ResponseType::error)
         {
             if (startedStreaming)
             {
